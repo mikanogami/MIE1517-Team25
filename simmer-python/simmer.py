@@ -107,6 +107,8 @@ try:
         utilities.simulate_sensors(environment, SIMULATE_LIST)
 
         # Update the sensors that need to be updated every frame
+        print(ROBOT.sensors.values())
+        break
         for sensor in ROBOT.sensors.values():
             if callable(getattr(sensor, "update", None)):
                 sensor.update(environment)

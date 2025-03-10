@@ -211,7 +211,7 @@ u1_info = {
 }
 
 g0_info = {
-    'id': 'u0',
+    'id': 'g0',
     'position': [0, 0],
     'rotation': 0,
     'error': 0.02,
