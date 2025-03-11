@@ -145,8 +145,9 @@ class Ultrasonic(Device):
 
         # Build the value to return
         output = math.sqrt(min(self.ray_lengths_squared))
-
-        return utilities.add_error(output, self.error_pct, self.reading_bounds)
+        self.last_reading = utilities.add_error(output, self.error_pct, self.reading_bounds)
+        #print(self.last_reading)
+        return self.last_reading
 
     def _block_visible(self, BLOCK):
         '''Determines whether the block is visibile to an ultrasonic sensor based on its height.'''

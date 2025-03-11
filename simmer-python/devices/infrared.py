@@ -108,8 +108,9 @@ class Infrared(Device):
         intersect_percent = overlap.area/area
 
         intersect_error = utilities.add_error(intersect_percent, self.error_pct, [0,1])
-
+        self.last_reading = False
         if intersect_error >= self.threshold:
-            return True
+            self.last_reading = True
+            return self.last_reading
         else:
-            return False
+            return self.last_reading

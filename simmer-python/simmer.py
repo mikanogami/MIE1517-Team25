@@ -107,7 +107,16 @@ try:
         utilities.simulate_sensors(environment, SIMULATE_LIST)
 
         # Update the sensors that need to be updated every frame
+
+        #break
+
         for sensor in ROBOT.sensors.values():
+            ultrasonic_sensor = ROBOT.sensors['u0']
+            infrared_sensor = ROBOT.sensors['i0']
+            gyro_sensor = ROBOT.sensors['g0']
+            print(f"infrared sensor reading: : {ultrasonic_sensor.last_reading}")
+            print(f"infrared sensor reading: {infrared_sensor.last_reading}")
+            print(f"gyro sensor reading: {gyro_sensor.gyro}")
             if callable(getattr(sensor, "update", None)):
                 sensor.update(environment)
 
