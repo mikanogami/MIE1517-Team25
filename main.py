@@ -21,6 +21,9 @@ This is the main file of SimMeR.
 # Imports
 import numpy as np
 import pygame
+import sys, os
+
+sys.path.append(os.path.abspath("simmer-python"))
 from maze import Maze
 from robot import Robot
 from block import Block
@@ -57,7 +60,7 @@ BLOCK = Block()
 
 # Create a copy of the environment objects to pass to simulation functions
 environment = {'BLOCK': BLOCK, 'MAZE': MAZE, 'ROBOT': ROBOT}
-
+print(MAZE.walls)
 # Load the Heads Up Display
 HUD = Hud()
 
