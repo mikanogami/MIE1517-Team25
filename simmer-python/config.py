@@ -180,7 +180,7 @@ drives = {
 # Sensors
 u0_info = {
     'id': 'u0',
-    'position': [0, 3],
+    'position': [3, 3],
     'height': 2,
     'rotation': 0,
     'error': 0.02,
@@ -196,7 +196,7 @@ u0_info = {
 
 u1_info = {
     'id': 'u1',
-    'position': [-3, 3],
+    'position': [0, 3],
     'height': 4,
     'rotation': 0,
     'error': 0.02,
@@ -212,7 +212,7 @@ u1_info = {
 
 u2_info = {
     'id': 'u2',
-    'position': [3, 3],
+    'position': [-3, 3],
     'height': 4,
     'rotation': 0,
     'error': 0.02,

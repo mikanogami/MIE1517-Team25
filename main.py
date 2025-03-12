@@ -32,6 +32,8 @@ from interface.communication import TCPServer
 import config as CONFIG
 import utilities
 
+from expert import Expert
+
 ### Initialization
 print('SimMeR Loading...')
 
@@ -60,7 +62,7 @@ BLOCK = Block()
 
 # Create a copy of the environment objects to pass to simulation functions
 environment = {'BLOCK': BLOCK, 'MAZE': MAZE, 'ROBOT': ROBOT}
-print(MAZE.walls)
+
 # Load the Heads Up Display
 HUD = Hud()
 
@@ -68,15 +70,21 @@ HUD = Hud()
 COMM = TCPServer()
 COMM.start()
 
+# Create expert that controls robot
+EXPERT = Expert(kp=0.25, kd=0.025)
+
+#speed = 
+
 # Initialize graphics
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
 
 ### Main Loop ###
 RUNNING = True
+expert_control = True
 try:
     while RUNNING:
-
+        
         ##########################
         ##### USER INTERFACE #####
         ##########################
@@ -107,12 +115,19 @@ try:
         ROBOT.update_device_positions()
 
         # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(environment, SIMULATE_LIST)
+        #utilities.simulate_sensors(environment, SIMULATE_LIST)
 
+        u0 = ROBOT.sensors.get('u0').simulate(0, environment)   # left sensor reading
+        u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # middle sensor reading
+        u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # right sensor reading
+
+        #if expert_control:
+            
+        #print(f"u0: {u0}, u1: {u1}, u2, {u2}")
         # Update the sensors that need to be updated every frame
-        for sensor in ROBOT.sensors.values():
-            if callable(getattr(sensor, "update", None)):
-                sensor.update(environment)
+        #for sensor in ROBOT.sensors.values():
+        #    if callable(getattr(sensor, "update", None)):
+        #        sensor.update(environment)
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####
