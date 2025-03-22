@@ -138,6 +138,48 @@ class Robot():
                 if device.visible_measurement:
                     device.draw_measurement(canvas)
 
+    def move_constant_speed_manual(self, walls, keypress=None):
+        '''Move forward at set speed & determine direction to rotate the robot based on keypresses.'''
+
+        move_vector = pm.Vector2(0, 0)
+        rotation = 0
+        speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
+        rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
+
+        # moves robot forward at constant speed (distance / frame)
+        move_vector += [0, speed]
+
+        # Rotation from keypress
+        if keypress is not None:
+            if keypress[K_d]:
+                rotation += rotation_speed
+            if keypress[K_a]:
+                rotation += -rotation_speed
+
+        # Move the robot
+        self.move(move_vector, rotation, walls)
+
+    def move_constant_speed(self, walls, steering_angle):
+        '''Move forward at set speed & rotates robot by steering angle.'''
+
+        move_vector = pm.Vector2(0, 0)
+        rotation = 0
+        speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
+        rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
+
+        # moves robot forward at constant speed (distance / frame)
+        move_vector += [0, speed]
+
+        # Rotation from keypress
+        if keypress is not None:
+            if keypress[K_d]:
+                rotation += rotation_speed
+            if keypress[K_a]:
+                rotation += -rotation_speed
+
+        # Move the robot
+        self.move(move_vector, rotation, walls)
+
     def move_manual(self, keypress, walls):
         '''Determine the direction to move & rotate the robot based on keypresses.'''
 

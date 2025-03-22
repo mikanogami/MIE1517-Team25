@@ -104,16 +104,6 @@ try:
             responses = ROBOT.command(cmds, environment)
             COMM.set_buffer_tx(responses)
 
-        # Move the robot, either from keypress commands or from the movement buffers
-        if True in keypress:
-            ROBOT.move_manual(keypress, [*BLOCK.block_square, *MAZE.reduced_walls])
-        else:
-            ROBOT.move_from_command([*BLOCK.block_square, *MAZE.reduced_walls])
-
-        # Recalculate global positions of the robot and its devices
-        ROBOT.update_outline()
-        ROBOT.update_device_positions()
-
         # Manually simulate a specific sensor or sensors
         #utilities.simulate_sensors(environment, SIMULATE_LIST)
 
@@ -121,13 +111,20 @@ try:
         u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # middle sensor reading
         u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # right sensor reading
 
-        #if expert_control:
-            
-        #print(f"u0: {u0}, u1: {u1}, u2, {u2}")
-        # Update the sensors that need to be updated every frame
-        #for sensor in ROBOT.sensors.values():
-        #    if callable(getattr(sensor, "update", None)):
-        #        sensor.update(environment)
+        # TODO: EXPERT takes robot position and orientation and outputs steering angle
+        # TODO: anytime EXPERT is controlling robot, it records sensor data (u0, u1, u2) and associated steering angle (this is our training data)
+        # TODO: NET takes u0, u1, u2 sensor readings and outputs steering angle
+
+        # this moves robot forward at constant speed and rotates the robot left or right depending on keypress
+        # TODO: once expert is implemented
+        if True in keypress:
+            ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
+        else:
+            ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls])
+
+        # Recalculate global positions of the robot and its devices
+        ROBOT.update_outline()
+        ROBOT.update_device_positions()
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####
