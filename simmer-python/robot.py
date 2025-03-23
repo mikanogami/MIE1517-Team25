@@ -159,26 +159,26 @@ class Robot():
         # Move the robot
         self.move(move_vector, rotation, walls)
 
-    def move_constant_speed(self, walls, steering_angle):
+    def move_constant_speed(self, walls, steering_angle=None):
         '''Move forward at set speed & rotates robot by steering angle.'''
 
         move_vector = pm.Vector2(0, 0)
         rotation = 0
         speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
-        rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
 
         # moves robot forward at constant speed (distance / frame)
         move_vector += [0, speed]
 
-        # Rotation from keypress
-        if keypress is not None:
-            if keypress[K_d]:
-                rotation += rotation_speed
-            if keypress[K_a]:
-                rotation += -rotation_speed
-
         # Move the robot
         self.move(move_vector, rotation, walls)
+
+    def turn_constant_speed(self, rotation=5, walls=None, direction=None):
+        '''Turn at a set speed'''
+        
+        move_vector = pm.Vector2(0, 0)
+        rotation = rotation
+        self.move(move_vector, rotation, walls)
+
 
     def move_manual(self, keypress, walls):
         '''Determine the direction to move & rotate the robot based on keypresses.'''

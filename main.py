@@ -71,7 +71,7 @@ COMM = TCPServer()
 COMM.start()
 
 # Create expert that controls robot
-EXPERT = Expert(kp=0.25, kd=0.025)
+EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.5, dt=0.1)
 
 #speed = 
 
@@ -120,11 +120,32 @@ try:
         if True in keypress:
             ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
         else:
-            ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls])
+            ROBOT.move_constant_speed([*BLOCK.block_square, *MAZE.reduced_walls])
 
         # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()
         ROBOT.update_device_positions()
+
+        for sensor in ROBOT.sensors.values():
+            # print(f"u0: {u0}")
+            # print(f"u1: {u1}")
+            # print(f"u2: {u2}")
+            if callable(getattr(sensor, "update", None)):
+                sensor.update(environment)
+
+        # TODO: Sensor logic
+        WALL_DISTANCE = 2.92
+
+        # if detect an object ahead, turn in the direction of greatest sensor reading
+        if u1 < 4:  # Obstacle detected in front
+            print("Wall ahead! Turning left...")
+            ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
+        else:
+            # Follow right wall using PID
+            error = WALL_DISTANCE - u0
+            steering_adjustment = EXPERT.compute(error)
+            ROBOT.turn_constant_speed(rotation=steering_adjustment, walls=[*BLOCK.block_square, *MAZE.reduced_walls])
+
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####
