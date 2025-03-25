@@ -73,7 +73,7 @@ COMM = TCPServer()
 COMM.start()
 
 # Create expert that controls robot
-EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.75, dt=0.5)
+EXPERT = Expert(Kp=1.5, Ki=0.1, Kd=7.5, dt=0.5)
 
 # Initialize CSV training data list
 training_data = []
