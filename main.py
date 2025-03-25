@@ -117,8 +117,9 @@ def run_sim():
 
             # this moves robot forward at constant speed and rotates the robot left or right depending on keypress
             # TODO: once expert is implemented
-            WALL_DISTANCE = 2.2   # 2
+            WALL_DISTANCE = 2.8   # 2
 
+<<<<<<< HEAD
         if True in keypress:
             ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
         # if u1 < 8 and u2 < 4:  # Obstacle detected in front - 6
@@ -133,6 +134,22 @@ def run_sim():
             error = WALL_DISTANCE - u0
             steering_adjustment = EXPERT.compute(error)
             ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+=======
+            if True in keypress:
+                ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
+            # if u1 < 8 and u2 < 4:  # Obstacle detected in front - 6
+            #     print("Wall ahead! Turning left...")
+            #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
+                # print("detect")
+            elif u1 < 8:  # Obstacle detected in front - 6 for the hard maze
+                print("Wall ahead! Turning left...")
+                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=1)   # 5 for difficult maze
+            else:
+                # Follow right wall using PID (EXPERT control branch, do not modify this)
+                error = WALL_DISTANCE - u0
+                steering_adjustment = EXPERT.compute(error)
+                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+>>>>>>> 0fda5da39efdedda3f2b47b5e26a64e377a7aa32
 
                 # Log training data for expert control: timestamp, sensor readings, and steering adjustment
                 timestamp = datetime.datetime.now().isoformat()
