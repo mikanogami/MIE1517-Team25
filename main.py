@@ -137,8 +137,8 @@ try:
         WALL_DISTANCE = 2.92
 
         # if detect an object ahead, turn in the direction of greatest sensor reading
-        if u1 < 4:  # Obstacle detected in front
-            print("Wall ahead! Turning left...")
+        if u1 < 5:  # Obstacle detected in front
+            print("Wall ahead! Turning right...")
             ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
         else:
             # Follow right wall using PID
