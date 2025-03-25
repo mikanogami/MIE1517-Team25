@@ -134,10 +134,10 @@ try:
                 sensor.update(environment)
 
         # TODO: Sensor logic
-        WALL_DISTANCE = 2.92
+        WALL_DISTANCE = 2
 
         # if detect an object ahead, turn in the direction of greatest sensor reading
-        if u1 < 4:  # Obstacle detected in front
+        if u1 < 6:  # Obstacle detected in front
             print("Wall ahead! Turning left...")
             ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
         else:
