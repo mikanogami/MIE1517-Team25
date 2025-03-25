@@ -71,7 +71,7 @@ COMM = TCPServer()
 COMM.start()
 
 # Create expert that controls robot
-EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.5, dt=0.1)
+EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.75, dt=0.5)
 
 #speed = 
 
