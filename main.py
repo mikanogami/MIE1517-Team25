@@ -75,6 +75,8 @@ def run_sim():
 
     # Create expert that controls robot
     EXPERT = Expert(Kp=1.5, Ki=0.1, Kd=7.5, dt=0.5)
+    #EXPERT.get_cte(ROBOT.position, ROBOT.rotation)
+    
 
     # Initialize CSV training data list
     training_data = []
@@ -125,7 +127,7 @@ def run_sim():
             #     print("Wall ahead! Turning left...")
             #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
                 # print("detect")
-            elif u1 < 6:  # Obstacle detected in front - 6
+            elif u1 < 8:  # Obstacle detected in front - 6
                 print("Wall ahead! Turning left...")
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
             else:

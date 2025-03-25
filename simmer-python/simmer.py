@@ -101,12 +101,14 @@ try:
 
         # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()
-        ROBOT.update_device_positions()
-
+        ROBOT.update_device_positions() 
+        robot_angle = (ROBOT.rotation % 360 + 360) % 360
+        #print(robot_angle)
         # Manually simulate a specific sensor or sensors
         utilities.simulate_sensors(environment, SIMULATE_LIST)
 
         # Update the sensors that need to be updated every frame
+        """
         for sensor in ROBOT.sensors.values():
             if callable(getattr(sensor, "update", None)):
                 sensor.update(environment)
@@ -116,7 +118,7 @@ try:
                 print(f"infrared sensor reading: : {ultrasonic_sensor_reading.last_reading}")
                 print(f"infrared sensor reading: {infrared_sensor_reading.last_reading}")
                 print(f"gyro sensor reading: {gyro_sensor_reading.gyro}")
-
+        """
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####
         ###########################################

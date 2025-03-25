@@ -29,7 +29,11 @@ class RobotControlNet(nn.Module):
 
         return angle, move
 
+def train_model(model, train_loader, test_loader):
+    print("training model")
+
 net = RobotControlNet()
 x_in = torch.randn(100, 3)
 angle, move = net(x_in)
+
 print(angle.shape, move.shape)

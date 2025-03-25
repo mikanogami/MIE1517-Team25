@@ -50,7 +50,7 @@ block_size = 0                  # Block side length in inches
 # set block size to 0 so it isn't shown in simulator
 
 # Robot information
-robot_start_position = [6, 42]  # Robot starting location (in)
+robot_start_position = [6, 36]  # Robot starting location (in)
 robot_start_rotation = 180      # Robot starting rotation (deg)
 robot_width = 6                 # Robot width in inches
 robot_height = 6                # Robot height in inches
