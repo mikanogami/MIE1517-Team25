@@ -124,7 +124,7 @@ try:
         #     print("Wall ahead! Turning left...")
         #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
             # print("detect")
-        elif u1 < 8:  # Obstacle detected in front - 6
+        elif u1 < 6:  # Obstacle detected in front - 6
             print("Wall ahead! Turning left...")
             ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
         else:
