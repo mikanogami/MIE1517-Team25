@@ -134,7 +134,7 @@ try:
 
         # if detect an object ahead, turn in the direction of greatest sensor reading
         if u1 < 6:  # Obstacle detected in front
-            print("Wall ahead! Turning left...")
+            print("Wall ahead! Turning right...")
             ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
         else:
             # Follow right wall using PID (EXPERT control branch, do not modify this)
