@@ -143,3 +143,4 @@ class Maze:
             pygame.draw.rect(canvas, (255, 255, 255), white_tile)
         for black_tile in self.floor_rect_black:
             pygame.draw.rect(canvas, (0, 0, 0), black_tile)
+    
