@@ -22,6 +22,8 @@ This is the main file of SimMeR.
 import numpy as np
 import pygame
 import sys, os
+import csv
+import datetime
 
 sys.path.append(os.path.abspath("simmer-python"))
 from maze import Maze
@@ -73,7 +75,8 @@ COMM.start()
 # Create expert that controls robot
 EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.75, dt=0.5)
 
-#speed = 
+# Initialize CSV training data list
+training_data = []
 
 # Initialize graphics
 pygame.init()
@@ -84,7 +87,7 @@ RUNNING = True
 expert_bool = True
 try:
     while RUNNING:
-        
+
         ##########################
         ##### USER INTERFACE #####
         ##########################
@@ -111,10 +114,6 @@ try:
         u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # middle sensor reading
         u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # right sensor reading
 
-        # TODO: EXPERT takes robot position and orientation and outputs steering angle
-        # TODO: anytime EXPERT is controlling robot, it records sensor data (u0, u1, u2) and associated steering angle (this is our training data)
-        # TODO: NET takes u0, u1, u2 sensor readings and outputs steering angle
-
         # this moves robot forward at constant speed and rotates the robot left or right depending on keypress
         # TODO: once expert is implemented
         if True in keypress:
@@ -127,13 +126,10 @@ try:
         ROBOT.update_device_positions()
 
         for sensor in ROBOT.sensors.values():
-            # print(f"u0: {u0}")
-            # print(f"u1: {u1}")
-            # print(f"u2: {u2}")
             if callable(getattr(sensor, "update", None)):
                 sensor.update(environment)
 
-        # TODO: Sensor logic
+        # Sensor logic
         WALL_DISTANCE = 2
 
         # if detect an object ahead, turn in the direction of greatest sensor reading
@@ -141,11 +137,15 @@ try:
             print("Wall ahead! Turning left...")
             ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
         else:
-            # Follow right wall using PID
+            # Follow right wall using PID (EXPERT control branch, do not modify this)
             error = WALL_DISTANCE - u0
             steering_adjustment = EXPERT.compute(error)
-            ROBOT.turn_constant_speed(rotation=steering_adjustment, walls=[*BLOCK.block_square, *MAZE.reduced_walls])
 
+            # Log training data for expert control: timestamp, sensor readings, and steering adjustment
+            timestamp = datetime.datetime.now().isoformat()
+            training_data.append((timestamp, u0, u1, u2, steering_adjustment))
+
+            ROBOT.turn_constant_speed(rotation=steering_adjustment, walls=[*BLOCK.block_square, *MAZE.reduced_walls])
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####
@@ -179,6 +179,11 @@ try:
 except KeyboardInterrupt:
     pass
 
-# Done! Time to quit.
+# Save training data on exit
+with open("expert_training_data.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["timestamp", "u0", "u1", "u2", "steering_angle"])
+    writer.writerows(training_data)
+
 print('Execution finished. Closing SimMeR.')
 pygame.quit()
