@@ -116,36 +116,30 @@ try:
 
         # this moves robot forward at constant speed and rotates the robot left or right depending on keypress
         # TODO: once expert is implemented
+        WALL_DISTANCE = 2.2   # 2
+
         if True in keypress:
             ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
-        else:
-            ROBOT.move_constant_speed([*BLOCK.block_square, *MAZE.reduced_walls])
-
-        # Recalculate global positions of the robot and its devices
-        ROBOT.update_outline()
-        ROBOT.update_device_positions()
-
-        for sensor in ROBOT.sensors.values():
-            if callable(getattr(sensor, "update", None)):
-                sensor.update(environment)
-
-        # Sensor logic
-        WALL_DISTANCE = 2
-
-        # if detect an object ahead, turn in the direction of greatest sensor reading
-        if u1 < 6:  # Obstacle detected in front
-            print("Wall ahead! Turning right...")
-            ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
+        # if u1 < 8 and u2 < 4:  # Obstacle detected in front - 6
+        #     print("Wall ahead! Turning left...")
+        #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
+            # print("detect")
+        elif u1 < 8:  # Obstacle detected in front - 6
+            print("Wall ahead! Turning left...")
+            ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
         else:
             # Follow right wall using PID (EXPERT control branch, do not modify this)
             error = WALL_DISTANCE - u0
             steering_adjustment = EXPERT.compute(error)
+            ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
 
             # Log training data for expert control: timestamp, sensor readings, and steering adjustment
             timestamp = datetime.datetime.now().isoformat()
             training_data.append((timestamp, u0, u1, u2, steering_adjustment))
 
-            ROBOT.turn_constant_speed(rotation=steering_adjustment, walls=[*BLOCK.block_square, *MAZE.reduced_walls])
+        # Recalculate global positions of the robot and its devices
+        ROBOT.update_outline()
+        ROBOT.update_device_positions()
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####
