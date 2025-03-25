@@ -165,7 +165,6 @@ class Robot():
         move_vector = pm.Vector2(0, 0)
         rotation = steering_angle
         speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
-        print(rotation)
         # moves robot forward at constant speed (distance / frame)
         move_vector += [0, speed]
 
