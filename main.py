@@ -184,6 +184,7 @@ with open("expert_training_data.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["timestamp", "u0", "u1", "u2", "steering_angle"])
     writer.writerows(training_data)
+    print('Saved CSV!')
 
 print('Execution finished. Closing SimMeR.')
 pygame.quit()
