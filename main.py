@@ -81,7 +81,7 @@ canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
 
 ### Main Loop ###
 RUNNING = True
-expert_control = True
+expert_bool = True
 try:
     while RUNNING:
         
@@ -168,7 +168,7 @@ try:
 
         # Update the various HUD elements
         HUD.draw_frame_indicator(canvas)
-        HUD.draw_keys(canvas, keypress)
+        HUD.draw_expert_indicator(canvas, expert_bool)
 
         # Limit the framerate
         HUD.clock.tick(CONFIG.frame_rate)

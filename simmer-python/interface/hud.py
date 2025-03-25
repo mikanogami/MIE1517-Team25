@@ -120,6 +120,13 @@ class Hud:
             else:
                 pygame.draw.rect(canvas, self.key_ind_colors['none'], self.key_ind[key])
 
+    def draw_expert_indicator(self, canvas, expert_bool):
+        for [key, value] in self.key_ind.items():
+            if expert_bool:
+                pygame.draw.rect(canvas, (255, 0, 0), self.key_ind[key])
+            else:
+                pygame.draw.rect(canvas, (0, 255, 0), self.key_ind[key])
+
     def get_exec_time(self):
         '''Gets the frame calculation time'''
         return self.clock.get_rawtime()
