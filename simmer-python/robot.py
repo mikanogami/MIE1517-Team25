@@ -163,16 +163,16 @@ class Robot():
         '''Move forward at set speed & rotates robot by steering angle.'''
 
         move_vector = pm.Vector2(0, 0)
-        rotation = 0
+        rotation = steering_angle
         speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
-
+        print(rotation)
         # moves robot forward at constant speed (distance / frame)
         move_vector += [0, speed]
 
         # Move the robot
         self.move(move_vector, rotation, walls)
 
-    def turn_constant_speed(self, rotation=5, walls=None, direction=None):
+    def turn_constant_speed(self, rotation=1, walls=None, direction=None):
         '''Turn at a set speed'''
         
         move_vector = pm.Vector2(0, 0)

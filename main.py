@@ -71,7 +71,7 @@ COMM = TCPServer()
 COMM.start()
 
 # Create expert that controls robot
-EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.75, dt=0.5)
+EXPERT = Expert(Kp=2.0, Ki=0.1, Kd=0.75, dt=0.1)
 
 #speed = 
 
@@ -117,35 +117,26 @@ try:
 
         # this moves robot forward at constant speed and rotates the robot left or right depending on keypress
         # TODO: once expert is implemented
+        WALL_DISTANCE = 2.2   # 2
+
         if True in keypress:
             ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
-        else:
-            ROBOT.move_constant_speed([*BLOCK.block_square, *MAZE.reduced_walls])
-
-        # Recalculate global positions of the robot and its devices
-        ROBOT.update_outline()
-        ROBOT.update_device_positions()
-
-        for sensor in ROBOT.sensors.values():
-            # print(f"u0: {u0}")
-            # print(f"u1: {u1}")
-            # print(f"u2: {u2}")
-            if callable(getattr(sensor, "update", None)):
-                sensor.update(environment)
-
-        # TODO: Sensor logic
-        WALL_DISTANCE = 2
-
-        # if detect an object ahead, turn in the direction of greatest sensor reading
-        if u1 < 6:  # Obstacle detected in front
+        # if u1 < 8 and u2 < 4:  # Obstacle detected in front - 6
+        #     print("Wall ahead! Turning left...")
+        #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
+            # print("detect")
+        elif u1 < 8:  # Obstacle detected in front - 6
             print("Wall ahead! Turning left...")
-            ROBOT.turn_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls])
+            ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
         else:
             # Follow right wall using PID
             error = WALL_DISTANCE - u0
             steering_adjustment = EXPERT.compute(error)
-            ROBOT.turn_constant_speed(rotation=steering_adjustment, walls=[*BLOCK.block_square, *MAZE.reduced_walls])
-
+            ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+        
+        # Recalculate global positions of the robot and its devices
+        ROBOT.update_outline()
+        ROBOT.update_device_positions()
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####

@@ -65,7 +65,7 @@ robot_outline = [               # Robot outline, relative to center position
 wall_segment_length = 12    # Length of maze wall segments (inches)
 floor_segment_length = 3    # Size of floor pattern squares (inches)
 
-walls = [[3,3,1,1,0,2,0,2],
+walls = [[1,3,1,1,0,2,0,2],
          [3,3,0,1,1,1,1,1],
          [1,0,2,0,0,1,0,1],
          [1,1,1,1,1,1,0,2]] # Matrix to define the maze walls
