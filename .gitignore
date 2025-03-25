@@ -124,3 +124,4 @@ cython_debug/
 test.py
 .vscode/arduino.json
 .vscode/c_cpp_properties.json
+/expert_training_data.csv

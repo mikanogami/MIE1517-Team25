@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ffd804b6-397e-48cf-a7cf-e84220f62ab4" name="Changes" comment="added CSV Saving">
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    <list default="true" id="ffd804b6-397e-48cf-a7cf-e84220f62ab4" name="Changes" comment="kd tuning">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +50,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.block.executor": "Run",
     "Python.expert.executor": "Run",
     "Python.infrared.executor": "Run",
     "Python.main.executor": "Run",
@@ -140,11 +142,30 @@
       <option name="project" value="LOCAL" />
       <updated>1742915222088</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="kd tuning">
+      <option name="closed" value="true" />
+      <created>1742915616419</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1742915616419</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Sensor Values can now be retrieved from simmer.py" />
@@ -152,13 +173,15 @@
     <MESSAGE value="&quot;turning right&quot;" />
     <MESSAGE value="added basic model in model.py" />
     <MESSAGE value="added CSV Saving" />
-    <option name="LAST_COMMIT_MESSAGE" value="added CSV Saving" />
+    <MESSAGE value="kd tuning" />
+    <option name="LAST_COMMIT_MESSAGE" value="kd tuning" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MIE1517_Team25$model.coverage" NAME="model Coverage Results" MODIFIED="1742908975259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simmer-python/devices" />
+    <SUITE FILE_PATH="coverage/MIE1517_Team25$block.coverage" NAME="block Coverage Results" MODIFIED="1742917003230" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simmer-python" />
     <SUITE FILE_PATH="coverage/MIE1517_Team25$simmer.coverage" NAME="simmer Coverage Results" MODIFIED="1741731655249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simmer-python" />
     <SUITE FILE_PATH="coverage/MIE1517_Team25$infrared.coverage" NAME="infrared Coverage Results" MODIFIED="1741729964049" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simmer-python/devices" />
     <SUITE FILE_PATH="coverage/MIE1517_Team25$expert.coverage" NAME="expert Coverage Results" MODIFIED="1741731678289" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MIE1517_Team25$main.coverage" NAME="main Coverage Results" MODIFIED="1742915458331" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MIE1517_Team25$main.coverage" NAME="main Coverage Results" MODIFIED="1742917008679" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
