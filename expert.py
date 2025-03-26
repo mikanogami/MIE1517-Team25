@@ -125,7 +125,7 @@ class Expert:
         else:
             raise Exception("Robot outside of track")
     
-        heading_error = (rot - heading + 180) % 360 - 180
+        heading_error = (heading - rot + 180) % 360 - 180
 
         return cte, heading_error
     
