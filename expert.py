@@ -71,16 +71,20 @@ class Expert:
                 "bottomright": [maze_dim_x - track_width, maze_dim_y - track_width],
                 "bottomleft": [0 + track_width, maze_dim_y - track_width]}
 
+        zero_vec = np.array([0, 1])   # vector in the direction of angle=0
+
         # straight section: vertical track on the left
         if 0 <= x <= track_width and track_width <= y <= maze_dim_y - track_width:
             cte = abs(x - track_width) - track_width/2
             heading = 180 if CW else 0
         # turning section: top-left
         elif 0 <= x < track_width and 0 <= y < track_width:
-            x_c, y_c = tp["topleft"]
-            cte = math.dist([x_c,y_c], [x,y]) - track_width/2
-            theta_ref = math.atan2(y-y_c, x-x_c)    # angle of vector between turning point and robot position
-            heading = theta_ref + 90 if CW else theta_ref - 90
+            x_c, y_c = tp["topleft"] 
+            diff_vec = np.array([x,y]) - np.array([x_c,y_c])    # vector between current robot position and top-left turning point
+            diff_norm = np.linalg.norm(diff_vec)                # euclidean distance between turning point and current robot position
+            cte = diff_norm - track_width/2
+            theta_ref = np.arccos(np.dot(diff_vec, zero_vec) / (np.linalg.norm(zero_vec) * diff_norm)) * 180 / math.pi
+            heading = theta_ref + 90 if CW else theta_ref - 90 
         # straight section: horizontal track on the top
         elif track_width <= x <= maze_dim_x - track_width and 0 <= y <= track_width:
             cte = abs(y - track_width) - track_width/2
@@ -88,9 +92,11 @@ class Expert:
         # turning section: top-right
         elif maze_dim_x - track_width < x <= maze_dim_x and 0 <= y < track_width:
             x_c, y_c = tp["topright"]
-            cte = math.dist([x_c,y_c], [x,y]) - track_width/2
-            theta_ref = math.atan2(y-y_c, x-x_c)   
-            heading = theta_ref + 90 if CW else theta_ref - 90
+            diff_vec = np.array([x,y]) - np.array([x_c,y_c])    # vector between current robot position and top-left turning point
+            diff_norm = np.linalg.norm(diff_vec)                # euclidean distance between turning point and current robot position
+            cte = diff_norm - track_width/2
+            theta_ref = -np.arccos(np.dot(diff_vec, zero_vec) / (np.linalg.norm(zero_vec) * diff_norm)) * 180 / math.pi
+            heading = theta_ref + 90 if CW else theta_ref - 90 
         # straight section: vertical track on the right
         elif maze_dim_x - track_width <= x <= maze_dim_x and track_width <= y <= maze_dim_y - track_width:
             cte = abs(x - (maze_dim_x - track_width)) - track_width/2
@@ -98,9 +104,11 @@ class Expert:
         # turning section: bottom-right
         elif maze_dim_x - track_width < x <= maze_dim_x and maze_dim_y - track_width < y <= maze_dim_y:
             x_c, y_c = tp["bottomright"]
-            cte = math.dist([x_c,y_c], [x,y]) - track_width/2
-            theta_ref = math.atan2(y-y_c, x-x_c)   
-            heading = theta_ref + 90 if CW else theta_ref - 90
+            diff_vec = np.array([x,y]) - np.array([x_c,y_c])    # vector between current robot position and top-left turning point
+            diff_norm = np.linalg.norm(diff_vec)                # euclidean distance between turning point and current robot position
+            cte = diff_norm - track_width/2
+            theta_ref = -np.arccos(np.dot(diff_vec, zero_vec) / (np.linalg.norm(zero_vec) * diff_norm)) * 180 / math.pi
+            heading = theta_ref + 90 if CW else theta_ref - 90 
         # straight section: horizontal track on the bottom
         elif track_width <= x <= maze_dim_x - track_width and maze_dim_y - track_width <= y <= maze_dim_y:
             cte = abs(y - (maze_dim_y - track_width)) - track_width/2
@@ -108,13 +116,16 @@ class Expert:
         # turning section: bottom-left
         elif 0 <= x < track_width and maze_dim_y - track_width < y <= maze_dim_y: 
             x_c, y_c = tp["bottomleft"]
-            cte = math.dist([x_c,y_c], [x,y]) - track_width/2
-            theta_ref = math.atan2(y-y_c, x-x_c)   
-            heading = theta_ref + 90 if CW else theta_ref - 90
+            diff_vec = np.array([x,y]) - np.array([x_c,y_c])    # vector between current robot position and top-left turning point
+            diff_norm = np.linalg.norm(diff_vec)                # euclidean distance between turning point and current robot position
+            cte = diff_norm - track_width/2
+            theta_ref = np.arccos(np.dot(diff_vec, zero_vec) / (np.linalg.norm(zero_vec) * diff_norm)) * 180 / math.pi
+            heading = theta_ref + 90 if CW else theta_ref - 90 
         # ERROR: robot is outside of track
         else:
             raise Exception("Robot outside of track")
-
+    
         heading_error = (rot - heading + 180) % 360 - 180
+
         return cte, heading_error
     
