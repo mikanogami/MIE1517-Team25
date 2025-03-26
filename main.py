@@ -23,7 +23,7 @@ import numpy as np
 import pygame
 import sys, os
 import csv
-import datetime
+import datetime, time
 
 sys.path.append(os.path.abspath("simmer-python"))
 from maze import Maze
@@ -36,7 +36,7 @@ import utilities
 
 from expert import Expert
 
-def run_sim(model=None, save_expert_data=False, dagger_itr=-1):
+def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
     ### Initialization
     print('SimMeR Loading...')
 
@@ -69,10 +69,6 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=-1):
     # Load the Heads Up Display
     HUD = Hud()
 
-    # Load TCP Communication
-    COMM = TCPServer()
-    COMM.start()
-
     # Create expert that controls robot
     EXPERT = Expert()
     TRACK_PID = EXPERT.PID(Kp=2, Ki=3, Kd=7.5, dt=0.5)
@@ -88,6 +84,8 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=-1):
     ### Main Loop ###
     RUNNING = True
     expert_bool = True if model is None else False
+    start_time = time.time()
+
     try:
         while RUNNING:
 
@@ -98,17 +96,6 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=-1):
             game_events = pygame.event.get()
             RUNNING = HUD.check_input(game_events)
             keypress = pygame.key.get_pressed()
-
-            # Get the command information from the tcp buffer
-            cmds = COMM.get_buffer_rx()
-
-            ################################################
-            ##### ROBOT AND DEVICE UPDATES AND ACTIONS #####
-            ################################################
-            # Act on commands and respond
-            if cmds:
-                responses = ROBOT.command(cmds, environment)
-                COMM.set_buffer_tx(responses)
 
             # Manually simulate a specific sensor or sensors
             #utilities.simulate_sensors(environment, SIMULATE_LIST)
@@ -165,24 +152,37 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=-1):
             # Flip the display (update the canvas)
             pygame.display.flip()
 
+            # check that we have not surpassed runtime
+            if time.time() - start_time > runtime:
+                RUNNING = False
+
     except KeyboardInterrupt:
         pass
-        
+    
+    print(time.time() - start_time)
     # Save training data on exit
     if save_expert_data:
-        with open(f"data/training_data_{dagger_itr}.csv", "w", newline="") as csvfile:
+        with open(f"data/training_data_{dagger_itr}_{'CW' if CONFIG.clockwise else 'CCW'}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(training_data)
             print('Saved CSV!')
 
 if __name__ == "__main__":
+    # run simulation with robot moving clockwise
     start_pos_CW = [6, 36]
     start_rot_CW = 180
+    CONFIG.robot_start_position = start_pos_CW
+    CONFIG.robot_start_rotation = start_rot_CW
+    CONFIG.clockwise = True
+    run_sim(model=None, save_expert_data=True, dagger_itr=0, runtime=120)
+
+    # run simulation with robot moving counter clockwise
     start_pos_CCW = [6, 12]
     start_rot_CCW = 0
     CONFIG.robot_start_position = start_pos_CCW
     CONFIG.robot_start_rotation = start_rot_CCW
     CONFIG.clockwise = False
-    run_sim(model=None, save_expert_data=True, dagger_itr=0)
+    run_sim(model=None, save_expert_data=True, dagger_itr=0, runtime=120)
+
     print('Execution finished. Closing SimMeR.')
     pygame.quit()

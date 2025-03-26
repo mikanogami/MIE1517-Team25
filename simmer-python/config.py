@@ -60,6 +60,7 @@ robot_outline = [               # Robot outline, relative to center position
                 pm.Vector2( robot_width/2,  robot_width/2),
                 pm.Vector2( robot_width/2, -robot_width/2)
                 ]
+clockwise = True
 
 # Maze definition information
 wall_segment_length = 12    # Length of maze wall segments (inches)
