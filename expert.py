@@ -15,15 +15,38 @@ import utilities
 class Expert:
     '''This class represents the expert that navigates the robot successfully through maze implemented using PD controller'''
     #def simulate(self, u0, u1, u2):
-    def __init__(self, Kp, Ki, Kd, dt, da=0.1):
-        self.Kp = Kp
-        self.Ki = Ki
-        self.Kd = Kd
-        self.dt = dt
-        self.prev_error = 0
-        self.integral = 0
-        self.filtered_derivative = 0
-        self.derivative_alpha = da
+    def __init__(self):
+        pass
+
+    class PID:
+        def __init__(self, Kp, Ki, Kd, dt, da=0.1):
+            self.Kp = Kp
+            self.Ki = Ki
+            self.Kd = Kd
+            self.dt = dt
+            self.prev_error = 0
+            self.integral = 0
+            self.filtered_derivative = 0
+            self.derivative_alpha = da
+
+        def compute(self, error):
+            self.integral += error * self.dt
+
+            raw_derivative = (error - self.prev_error) / self.dt
+            # Apply low-pass filter to the derivative term
+            self.filtered_derivative = (
+                self.derivative_alpha * raw_derivative +
+                (1 - self.derivative_alpha) * self.filtered_derivative
+            )
+
+            output = (
+                self.Kp * error +
+                self.Ki * self.integral +
+                self.Kd * self.filtered_derivative
+            )
+
+            self.prev_error = error
+            return output
 
     def get_cte(self, position, rot, CW=True):
         '''
@@ -43,10 +66,10 @@ class Expert:
         maze_dim_y = 48
         # turning points on rectangular track
         tp = {
-            "topleft": [0 + track_width, 0 + track_width], 
-            "topright": [maze_dim_x - track_width, 0 + track_width], 
-            "bottomright": [maze_dim_x - track_width, maze_dim_y - track_width], 
-            "bottomleft": [0 + track_width, maze_dim_y - track_width]}
+                "topleft": [0 + track_width, 0 + track_width],
+                "topright": [maze_dim_x - track_width, 0 + track_width],
+                "bottomright": [maze_dim_x - track_width, maze_dim_y - track_width],
+                "bottomleft": [0 + track_width, maze_dim_y - track_width]}
 
         # straight section: vertical track on the left
         if 0 <= x <= track_width and track_width <= y <= maze_dim_y - track_width:
@@ -72,14 +95,16 @@ class Expert:
         elif maze_dim_x - track_width <= x <= maze_dim_x and track_width <= y <= maze_dim_y:
             cte = abs(x - (maze_dim_x - track_width)) - track_width/2
             heading = 0 if CW else 180
+            print(position)
         # turning section: bottom-right
-        elif maze_dim_y - track_width < x <= maze_dim_x and maze_dim_y - track_width < y <= maze_dim_y:
+        elif maze_dim_x - track_width < x <= maze_dim_x and maze_dim_y - track_width < y <= maze_dim_y:
             x_c, y_c = tp["bottomright"]
             cte = math.dist([x_c,y_c], [x,y]) - track_width/2
             theta_ref = math.atan2(y-y_c, x-x_c)   
             heading = theta_ref + 90 if CW else theta_ref - 90
+            print("here")
         # straight section: horizontal track on the bottom
-        elif track_width <= x <= maze_dim_y - track_width and maze_dim_y - track_width <= y <= maze_dim_y:
+        elif track_width <= x <= maze_dim_x - track_width and maze_dim_y - track_width <= y <= maze_dim_y:
             cte = abs(y - (maze_dim_y - track_width)) - track_width/2
             heading = 90 if CW else 270
         # turning section: bottom-left
@@ -94,22 +119,4 @@ class Expert:
 
         heading_error = (rot - heading + 180) % 360 - 180
         return cte, heading_error
-        
-    def compute(self, error):
-        self.integral += error * self.dt
-
-        raw_derivative = (error - self.prev_error) / self.dt
-        # Apply low-pass filter to the derivative term
-        self.filtered_derivative = (
-            self.derivative_alpha * raw_derivative +
-            (1 - self.derivative_alpha) * self.filtered_derivative
-        )
-
-        output = (
-            self.Kp * error +
-            self.Ki * self.integral +
-            self.Kd * self.filtered_derivative
-        )
-
-        self.prev_error = error
-        return output
+    
