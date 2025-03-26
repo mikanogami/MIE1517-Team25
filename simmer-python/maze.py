@@ -144,3 +144,7 @@ class Maze:
         for black_tile in self.floor_rect_black:
             pygame.draw.rect(canvas, (0, 0, 0), black_tile)
     
+    # Function to draw the trajectory on the screen
+    def draw_trajectory(self, canvas, trajectory):
+        for point in trajectory:
+            pygame.draw.circle(canvas, (0, 255, 0), point, 5)  # Plot the points

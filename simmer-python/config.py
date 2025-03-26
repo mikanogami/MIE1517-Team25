@@ -172,7 +172,7 @@ r0_info = {
     'rotation': 0,
     'visible': False,
     'velocity': [0, 0],
-    'ang_velocity': 120,
+    'ang_velocity': 60,
     'motors': [motors['m0'], motors['m1'], motors['m2'], motors['m3']],
     'motor_direction': [1, -1, 1, -1],
     'bias': {'x': 0, 'y': 0, 'rotation': 0},

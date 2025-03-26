@@ -74,9 +74,9 @@ def run_sim():
     COMM.start()
 
     # Create expert that controls robot
-    EXPERT = Expert(Kp=1.5, Ki=0.1, Kd=7.5, dt=0.5)
-    #EXPERT.get_cte(ROBOT.position, ROBOT.rotation)
-    
+    EXPERT = Expert()   #     TRACK_PID = EXPERT.PID(Kp=1.5, Ki=0.1, Kd=7.5, dt=0.5)
+    TRACK_PID = EXPERT.PID(Kp=2, Ki=0, Kd=2, dt=0.5)
+    TRAJECTORY_PID = EXPERT.PID(Kp=0.1, Ki=0, Kd=0, dt=0.5)
 
     # Initialize CSV training data list
     training_data = []
@@ -117,7 +117,7 @@ def run_sim():
             u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # middle sensor reading
             u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # right sensor reading
 
-            # this moves robot forward at constant speed and rotates the robot left or right depending on keypress
+            # This moves robot forward at constant speed and rotates the robot left or right depending on keypress
             # TODO: once expert is implemented
             WALL_DISTANCE = 2.8   # 2
 
@@ -127,14 +127,18 @@ def run_sim():
             #     print("Wall ahead! Turning left...")
             #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
                 # print("detect")
-            elif u1 < 8:  # Obstacle detected in front - 6
-                print("Wall ahead! Turning left...")
-                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
+            # elif u1 < 8:  # Obstacle detected in front - 6
+            #     print("Wall ahead! Turning left...")
+            #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
             else:
-                # Follow right wall using PID (EXPERT control branch, do not modify this)
-                error = WALL_DISTANCE - u0
-                steering_adjustment = EXPERT.compute(error)
+                # Use both track and trajectory error to adjust steering angle
+                # ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+                cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation)
+                track_adjustment = TRACK_PID.compute(cte)
+                trajectory_adjustment = TRAJECTORY_PID.compute(heading_error)
+                steering_adjustment = track_adjustment
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+
 
             # Log training data for expert control: timestamp, sensor readings, and steering adjustment
             timestamp = datetime.datetime.now().isoformat()
@@ -156,8 +160,40 @@ def run_sim():
             # Draw the maze walls
             MAZE.draw_walls(canvas)
 
+            # Example trajectory (list of (x, y) positions)
+            track_width = 12
+            maze_dim_x = 96
+            maze_dim_y = 48
+
+            tp = {
+                "topleft": [0 + track_width/2, 0 + track_width/2],
+                "topright": [maze_dim_x - track_width/2, 0 + track_width/2],
+                "bottomright": [maze_dim_x - track_width/2, maze_dim_y - track_width/2],
+                "bottomleft": [0 + track_width/2, maze_dim_y - track_width/2]
+            }
+
+            # Convert inches to pixels for each coordinate in a dictionary
+            def inches_to_pixels_dict(inches_dict):
+                # Convert each (x, y) coordinate in the dictionary to pixels
+                return {key: [value[0] * CONFIG.ppi + CONFIG.border_pixels, value[1] * CONFIG.ppi + CONFIG.border_pixels] for key, value in inches_dict.items()}
+
+            tp_inches = inches_to_pixels_dict(tp)
+
+            # List of trajectory points based on the turning points
+            trajectory = [
+                tp_inches["topleft"],
+                tp_inches["topright"],
+                tp_inches["bottomright"],
+                tp_inches["bottomleft"],
+                tp_inches["topleft"]  # Closing the loop by returning to topleft
+            ]
+
+
             # Draw the block
             BLOCK.draw(canvas)
+
+            MAZE.draw_trajectory(canvas, trajectory)
+
 
             # Draw the robot onto the maze
             ROBOT.draw(canvas)
