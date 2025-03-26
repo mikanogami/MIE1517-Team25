@@ -92,17 +92,15 @@ class Expert:
             theta_ref = math.atan2(y-y_c, x-x_c)   
             heading = theta_ref + 90 if CW else theta_ref - 90
         # straight section: vertical track on the right
-        elif maze_dim_x - track_width <= x <= maze_dim_x and track_width <= y <= maze_dim_y:
+        elif maze_dim_x - track_width <= x <= maze_dim_x and track_width <= y <= maze_dim_y - track_width:
             cte = abs(x - (maze_dim_x - track_width)) - track_width/2
             heading = 0 if CW else 180
-            print(position)
         # turning section: bottom-right
         elif maze_dim_x - track_width < x <= maze_dim_x and maze_dim_y - track_width < y <= maze_dim_y:
             x_c, y_c = tp["bottomright"]
             cte = math.dist([x_c,y_c], [x,y]) - track_width/2
             theta_ref = math.atan2(y-y_c, x-x_c)   
             heading = theta_ref + 90 if CW else theta_ref - 90
-            print("here")
         # straight section: horizontal track on the bottom
         elif track_width <= x <= maze_dim_x - track_width and maze_dim_y - track_width <= y <= maze_dim_y:
             cte = abs(y - (maze_dim_y - track_width)) - track_width/2
