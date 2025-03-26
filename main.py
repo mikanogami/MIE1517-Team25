@@ -75,8 +75,8 @@ def run_sim():
 
     # Create expert that controls robot
     EXPERT = Expert()   #     TRACK_PID = EXPERT.PID(Kp=1.5, Ki=0.1, Kd=7.5, dt=0.5)
-    TRACK_PID = EXPERT.PID(Kp=2, Ki=0, Kd=2, dt=0.5)
-    TRAJECTORY_PID = EXPERT.PID(Kp=0.1, Ki=0, Kd=0, dt=0.5)
+    TRACK_PID = EXPERT.PID(Kp=1, Ki=0, Kd=7.5, dt=0.5)
+    TRAJECTORY_PID = EXPERT.PID(Kp=0.03, Ki=1, Kd=5, dt=0.5)
 
     # Initialize CSV training data list
     training_data = []
@@ -136,7 +136,7 @@ def run_sim():
                 cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation)
                 track_adjustment = TRACK_PID.compute(cte)
                 trajectory_adjustment = TRAJECTORY_PID.compute(heading_error)
-                steering_adjustment = track_adjustment
+                steering_adjustment = track_adjustment + trajectory_adjustment
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
 
 
