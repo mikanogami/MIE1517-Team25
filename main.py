@@ -122,7 +122,7 @@ def run_sim():
                 ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
             else:
                 # Use both track and trajectory error to adjust steering angle
-                cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation)
+                cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation, CW=False)
                 track_adjustment = TRACK_PID.compute(cte)
                 trajectory_adjustment = TRAJECTORY_PID.compute(heading_error)
                 steering_adjustment =  track_adjustment + trajectory_adjustment
