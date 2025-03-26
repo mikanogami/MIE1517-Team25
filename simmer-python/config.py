@@ -190,7 +190,7 @@ u0_info = {
     'id': 'u0',
     'position': [3, 3],
     'height': 2,
-    'rotation': -90,
+    'rotation': 0,
     'error': 0.02,
     'outline': [
         pm.Vector2(-1, -0.5),
@@ -222,7 +222,7 @@ u2_info = {
     'id': 'u2',
     'position': [-3, 3],
     'height': 4,
-    'rotation': 90,
+    'rotation': 0,
     'error': 0.02,
     'outline': [
         pm.Vector2(-1, -0.5),
