@@ -36,7 +36,7 @@ import utilities
 
 from expert import Expert
 
-def run_sim():
+def run_sim(model=None, save_expert_data=False, dagger_itr=-1):
     ### Initialization
     print('SimMeR Loading...')
 
@@ -87,7 +87,7 @@ def run_sim():
 
     ### Main Loop ###
     RUNNING = True
-    expert_bool = True
+    expert_bool = True if model is None else False
     try:
         while RUNNING:
 
@@ -121,28 +121,24 @@ def run_sim():
             # TODO: once expert is implemented
             WALL_DISTANCE = 2.8   # 2
 
-            if True in keypress:
-                ROBOT.move_constant_speed_manual([*BLOCK.block_square, *MAZE.reduced_walls], keypress)
-            # if u1 < 8 and u2 < 4:  # Obstacle detected in front - 6
-            #     print("Wall ahead! Turning left...")
-            #     ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=200)
-                # print("detect")
-            elif u1 < 8:  # Obstacle detected in front - 6
-                print("Wall ahead! Turning left...")
-                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=5)
-            else:
-                # Follow right wall using PID (EXPERT control branch, do not modify this)
-                error = WALL_DISTANCE - u0
-                steering_adjustment = EXPERT.compute(error)
+            if expert_bool:
+                # Use both track and trajectory error to adjust steering angle
+                cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation, CW=CONFIG.clockwise)
+                track_adjustment = TRACK_PID.compute(cte)
+                trajectory_adjustment = TRAJECTORY_PID.compute(heading_error)
+                steering_adjustment =  track_adjustment + trajectory_adjustment
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+                if save_expert_data:
+                    training_data.append((u0, u1, u2, steering_adjustment))
 
-            # Log training data for expert control: timestamp, sensor readings, and steering adjustment
-            timestamp = datetime.datetime.now().isoformat()
-            training_data.append((timestamp, u0, u1, u2, steering_adjustment))
+            else:
+                # model is controlling robot
+                pass
 
             # Recalculate global positions of the robot and its devices
             ROBOT.update_outline()
             ROBOT.update_device_positions()
+
 
             ###########################################
             ##### DRAW RELEVANT OBJECTS ON CANVAS #####
@@ -177,14 +173,20 @@ def run_sim():
         pass
         
     # Save training data on exit
-    with open("expert_training_data.csv", "w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["timestamp", "u0", "u1", "u2", "steering_angle"])
-        writer.writerows(training_data)
-        print('Saved CSV!')
+    if save_expert_data:
+        with open(f"data/training_data_{dagger_itr}.csv", "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(training_data)
+            print('Saved CSV!')
 
 if __name__ == "__main__":
-    run_sim()
-    
+    start_pos_CW = [6, 36]
+    start_rot_CW = 180
+    start_pos_CCW = [6, 12]
+    start_rot_CCW = 0
+    CONFIG.robot_start_position = start_pos_CCW
+    CONFIG.robot_start_rotation = start_rot_CCW
+    CONFIG.clockwise = False
+    run_sim(model=None, save_expert_data=True, dagger_itr=0)
     print('Execution finished. Closing SimMeR.')
     pygame.quit()
