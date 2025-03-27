@@ -58,7 +58,7 @@ def train_model(model, train_loader, learning_rate=1e-3, num_epochs=100):
 
         print(f"Epoch {epoch + 1}: Train err: {train_err[epoch]:.4f}, Train loss: {train_loss[epoch]:.4f}")    
 
-    model_path = (f"Model_lr{learning_rate}_ep{epoch}")
+    model_path = (f"Model_sensors{model.sensor_dim}_lr{learning_rate}_ep{epoch}")
     torch.save(model.state_dict(), model_path)
     print("Finished training")
 

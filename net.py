@@ -17,7 +17,8 @@ class RobotControlNet(nn.Module):
     def __init__(self, ultrasonic_dim=3, n_classes=20):
         super().__init__()
         self.n_classes = n_classes
-
+        self.sensor_dim = ultrasonic_dim
+        
         self.linearlayers = nn.Sequential(
             nn.Linear(ultrasonic_dim, 64),
             nn.LeakyReLU(0.1),
