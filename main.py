@@ -130,7 +130,13 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
             ROBOT.update_outline()
             ROBOT.update_device_positions()
 
-
+            cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation, CW=CONFIG.clockwise)
+            # if cte or heading_error are too high, expert takes over
+            if not expert_bool and (abs(cte) > 1.5 or abs(heading_error) > 15):
+                expert_bool = True
+            elif expert_bool and (abs(cte) < 0.5 and abs(heading_error) < 5):
+                expert_bool = False
+            
             ###########################################
             ##### DRAW RELEVANT OBJECTS ON CANVAS #####
             ###########################################
