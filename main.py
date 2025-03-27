@@ -73,8 +73,8 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
 
     # Create expert that controls robot
     EXPERT = Expert()
-    TRACK_PID = EXPERT.PID(Kp=2, Ki=3, Kd=7.5, dt=0.5)
-    TRAJECTORY_PID = EXPERT.PID(Kp=0.0001, Ki=0.5, Kd=1, dt=0.5)
+    TRACK_PID = EXPERT.PID(Kp=2, Ki=0, Kd=0.2, dt=0.5)
+    TRAJECTORY_PID = EXPERT.PID(Kp=0.01, Ki=0.0, Kd=1, dt=0.6)
 
     # Initialize CSV training data list
     training_data = []
@@ -87,6 +87,8 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
     RUNNING = True
     expert_bool = True if model is None else False
     start_time = time.time()
+
+    previous_adjustment = 0
 
     try:
         while RUNNING:
@@ -112,14 +114,19 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
                 track_adjustment = TRACK_PID.compute(cte)
                 trajectory_adjustment = TRAJECTORY_PID.compute(heading_error)
                 steering_adjustment =  track_adjustment + trajectory_adjustment
+
+                alpha = 0.3  # Higher alpha means smoother but slower response
+                smoothed_adjustment = alpha * previous_adjustment + (1 - alpha) * steering_adjustment
+                previous_adjustment = smoothed_adjustment
+
                 # set bound on steering adjustment (required for our classification model)
-                if steering_adjustment > 1.5:
-                    steering_adjustment = 1.5
-                elif steering_adjustment < -1.5:
-                    steering_adjustment = -1.5
-                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
+                if smoothed_adjustment > 1.5:
+                    smoothed_adjustment = 1.5
+                elif smoothed_adjustment < -1.5:
+                    smoothed_adjustment = -1.5
+                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=smoothed_adjustment)
                 if save_expert_data:
-                    training_data.append((u0, u1, u2, steering_adjustment))
+                    training_data.append((u0, u1, u2, smoothed_adjustment))
 
             else:
                 sensor_vals = np.array([u0, u1, u2])
