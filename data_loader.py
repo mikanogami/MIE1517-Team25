@@ -1,9 +1,17 @@
 import os
+import math, random
 import torch
 import pandas as pd
 import numpy as np
 from collections import Counter
 from torch.utils.data import Dataset, Sampler
+
+# function used by dataloader
+def collate_fn(batch):
+    inputs, labels = batch
+    inputs = torch.tensor(inputs, dtype=torch.float32)
+    labels = torch.tensor(labels, dtype=torch.int64)
+    return inputs, labels
 
 class SensorDataset(Dataset):
     def __init__(self, root_dir, num_classes):
@@ -13,40 +21,103 @@ class SensorDataset(Dataset):
             num_classes (int): Number of categories to discretize the continuous labels.
         """
         self.root_dir = root_dir
-        self.num_classes = num_classes
+        self.n_classes = num_classes
         self.filepaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if f.endswith(".csv")]
 
         # Load and concatenate all CSV files
-        self.data = pd.concat([pd.read_csv(f, header=None) for f in self.filepaths], ignore_index=True)
+        data_from_file = [np.loadtxt(f, delimiter=",") for f in self.filepaths]
+        self.data = np.vstack(data_from_file)
 
         # Extract features (sensor values) and labels
-        self.features = self.data.iloc[:, :-1].values.astype(np.float32)  # All columns except last
-        self.labels = self.data.iloc[:, -1].values.astype(np.float32)  # Last column (continuous label)
+        self.features = self.data[:, :-1]   # All columns except last
+        self.labels_raw = self.data[:, -1]      # Last column (continuous label)
+        self.labels = np.empty(self.labels_raw.shape)
 
-        # Convert continuous labels into categorical bins
-        self.labels = self._discretize_labels(self.labels)
-
-    def _discretize_labels(self, labels):
-        """Discretizes continuous labels into 'num_classes' bins."""
-        min_label, max_label = labels.min(), labels.max()
-        bins = np.linspace(min_label, max_label, self.num_classes + 1)  # Create num_classes bins
-        categorical_labels = np.digitize(labels, bins, right=True) - 1  # Convert to bin indices
-
-        # Ensure labels are within valid range [0, num_classes-1]
-        categorical_labels = np.clip(categorical_labels, 0, self.num_classes - 1)
-        return categorical_labels.astype(np.int64)  # Convert to PyTorch-compatible dtype
+        for idx, label in enumerate(self.labels_raw):
+            self.labels[idx] = int(((label + 1.5) / 3.0) * (self.n_classes - 1))
+            if self.labels[idx] < 0:
+                print(f"bad label: {self.labels[idx]}, raw label: {self.labels_raw[idx]}, features: {self.features[idx]}")
 
     def __len__(self):
         return len(self.features)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.features[idx], dtype=torch.float32)
-        y = torch.tensor(self.labels[idx], dtype=torch.long)  # Long for classification tasks
+        x = self.features[idx]
+        y = self.labels[idx]
         return x, y
 
-
 class UniformBatchSampler(Sampler):
-    def __init__(self, dataset, batch_size, drop_last=True):
+
+    def __init__(self, data, batch_size, classes=-1):
+        # build data for sampling here
+        self.labels = data[:, -1]      # Last column (continuous label)
+        self.batch_size = batch_size
+        self.classes = classes
+        self.num_batch = math.floor(len(self.labels) / self.batch_size)
+        self.cmds_ordered = []
+
+        # [{key: label, value: list of idx of images with given label}, ...]
+        cmds_dict = {}
+        # [images with label=1, images with label=2, ...]
+        # each set of images with same label are shuffled before added to list
+        cmds_shuffled = []
+
+        # self.cmds_dict is a dict where key: label and value: list of idx that label occurs
+        for idx, label in enumerate(self.labels):
+            steering_command = np.array(label, dtype=np.float32)
+            steering_command = int(((steering_command + 1.5)/3.0) * (self.classes - 1)) 
+
+            if steering_command in cmds_dict:
+                cmds_dict.get(steering_command).append(idx)
+            else:
+                cmds_dict[steering_command] = [idx]
+
+        # our "filler" data will be the data with the most common label
+        filler_key = max(cmds_dict, key = lambda x: len(cmds_dict.get(x)))
+        filler_data = cmds_dict.get(filler_key)
+        cmds_dict.pop(filler_key)
+
+        for key in cmds_dict:
+            data = cmds_dict.get(key)
+            random.shuffle(data)
+            cmds_shuffled.extend(data)
+
+        random.shuffle(filler_data)
+        cmds_shuffled.extend(filler_data)
+
+        cmds_batched = {}
+
+        for i in range(0, self.batch_size):
+            for i_batch in range(0, self.num_batch):
+                next_item = cmds_shuffled[0]
+                del cmds_shuffled[0]
+
+                if i_batch in cmds_batched:
+                    cmds_batched.get(i_batch).append(next_item)
+                else:
+                    cmds_batched[i_batch] = [next_item]
+        
+        for i_batch in range(0, self.num_batch):
+            self.cmds_ordered.extend(cmds_batched.get(i_batch))
+
+    def __iter__(self):
+        # implement logic of sampling here
+        batch = []
+
+        for i, cmd in enumerate(self.cmds_ordered):
+            batch.append(cmd)
+            
+            if len(batch) == self.batch_size:
+                yield batch
+                batch = []
+
+
+    def __len__(self):
+        return len(self.labels)
+
+'''
+class UniformBatchSampler(Sampler):
+    def __init__(self, dataset, batch_size):
         """
         Args:
             dataset (CustomDataset): Dataset object with categorical labels.
@@ -55,7 +126,6 @@ class UniformBatchSampler(Sampler):
         """
         self.dataset = dataset
         self.batch_size = batch_size
-        self.drop_last = drop_last
         
         # Find indices for each class
         self.class_indices = {}
@@ -116,15 +186,13 @@ class UniformBatchSampler(Sampler):
             np.random.shuffle(batch)  # Shuffle within batch
             all_batches.append(batch)
 
-        # Handle remaining samples if drop_last is False
-        if not self.drop_last:
-            remaining_samples = []
-            for label in self.class_indices:
-                remaining_samples.extend(self.class_indices[label][num_batches * self.samples_per_class[label]:])
-            np.random.shuffle(remaining_samples)
+        remaining_samples = []
+        for label in self.class_indices:
+            remaining_samples.extend(self.class_indices[label][num_batches * self.samples_per_class[label]:])
+        np.random.shuffle(remaining_samples)
 
-            if len(remaining_samples) >= self.batch_size:
-                all_batches.append(remaining_samples[:self.batch_size])
+        if len(remaining_samples) >= self.batch_size:
+            all_batches.append(remaining_samples[:self.batch_size])
 
         np.random.shuffle(all_batches)  # Shuffle batch order
 
@@ -137,4 +205,5 @@ class UniformBatchSampler(Sampler):
         """
         min_class_size = min(len(indices) for indices in self.class_indices.values()) if self.class_indices else 0
         min_samples_per_class = min(self.samples_per_class.values()) if self.samples_per_class else 1
-        return min_class_size // min_samples_per_class if self.drop_last else (min_class_size // min_samples_per_class) + 1
+        return (min_class_size // min_samples_per_class) + 1
+'''

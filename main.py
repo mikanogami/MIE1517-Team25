@@ -24,6 +24,7 @@ import pygame
 import sys, os
 import csv
 import datetime, time
+import torch
 
 sys.path.append(os.path.abspath("simmer-python"))
 from maze import Maze
@@ -35,6 +36,7 @@ import config as CONFIG
 import utilities
 
 from expert import Expert
+from net import RobotControlNet
 
 def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
     ### Initialization
@@ -110,13 +112,19 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
                 track_adjustment = TRACK_PID.compute(cte)
                 trajectory_adjustment = TRAJECTORY_PID.compute(heading_error)
                 steering_adjustment =  track_adjustment + trajectory_adjustment
+                # set bound on steering adjustment (required for our classification model)
+                if steering_adjustment > 1.5:
+                    steering_adjustment = 1.5
+                elif steering_adjustment < -1.5:
+                    steering_adjustment = -1.5
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
                 if save_expert_data:
                     training_data.append((u0, u1, u2, steering_adjustment))
 
             else:
-                # model is controlling robot
-                pass
+                sensor_vals = np.array([u0, u1, u2])
+                steering_adjustment = model.get_steering_cmd(sensor_vals)
+                ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
 
             # Recalculate global positions of the robot and its devices
             ROBOT.update_outline()
@@ -162,19 +170,24 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
     print(time.time() - start_time)
     # Save training data on exit
     if save_expert_data:
-        with open(f"data/training_data_{dagger_itr}_{'CW' if CONFIG.clockwise else 'CCW'}.csv", "w", newline="") as csvfile:
+        with open(f"data_tmp/training_data_{dagger_itr}_{'CW' if CONFIG.clockwise else 'CCW'}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(training_data)
             print('Saved CSV!')
 
 if __name__ == "__main__":
+    n_classes = 20
+
+    agent = RobotControlNet(n_classes=n_classes)
+    agent.load_state_dict(torch.load("Model_lr0.001_ep299"))
+    
     # run simulation with robot moving clockwise
     start_pos_CW = [6, 36]
     start_rot_CW = 180
     CONFIG.robot_start_position = start_pos_CW
     CONFIG.robot_start_rotation = start_rot_CW
     CONFIG.clockwise = True
-    run_sim(model=None, save_expert_data=True, dagger_itr=0, runtime=120)
+    run_sim(model=agent, save_expert_data=False, dagger_itr=1, runtime=120)
 
     # run simulation with robot moving counter clockwise
     start_pos_CCW = [6, 12]
@@ -182,7 +195,7 @@ if __name__ == "__main__":
     CONFIG.robot_start_position = start_pos_CCW
     CONFIG.robot_start_rotation = start_rot_CCW
     CONFIG.clockwise = False
-    run_sim(model=None, save_expert_data=True, dagger_itr=0, runtime=120)
+    run_sim(model=agent, save_expert_data=False, dagger_itr=1, runtime=120)
 
     print('Execution finished. Closing SimMeR.')
     pygame.quit()

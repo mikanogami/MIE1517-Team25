@@ -10,26 +10,37 @@ import scipy.misc
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 
 
 class RobotControlNet(nn.Module):
     def __init__(self, ultrasonic_dim=3, n_classes=20):
         super().__init__()
+        self.n_classes = n_classes
 
-        self.shared_layer = nn.Sequential(
-            nn.Linear(ultrasonic_dim, 32),
+        self.linearlayers = nn.Sequential(
+            nn.Linear(ultrasonic_dim, 64),
             nn.LeakyReLU(0.1),
+            nn.Linear(64, n_classes),
         )
 
-        self.steering_angle = nn.Linear(32, n_classes)
-        self.do_move = nn.Linear(32, 2)
-
     def forward(self, x):
-        x = self.shared_layer(x)
-        angle = self.steering_angle(x)
-        move = self.do_move(x)
+        out = self.linearlayers(x)
+        return out
+    
+    def get_steering_cmd(self, sensor_vals):
+        state = torch.tensor(sensor_vals, dtype=torch.float32)
 
-        return angle, move
+        logits = self.forward(state)
+        y_pred = logits.view(-1, self.n_classes) 
+        y_probs_pred = F.softmax(y_pred, 1)
+
+        _, steering_class = torch.max(y_probs_pred, dim=1)
+        steering_class = steering_class.detach().cpu().numpy()
+        steering_cmd = (steering_class / (self.n_classes - 1.0))*2.0 - 1.0
+
+        return steering_cmd
+
 
 def train_model(model, train_loader, learning_rate=0.001, num_epochs=30):
     print("Start training model")
@@ -66,10 +77,3 @@ def train_model(model, train_loader, learning_rate=0.001, num_epochs=30):
         torch.save(net.state_dict(), model_path)
 
     print("Finished training")
-
- 
-net = RobotControlNet()
-x_in = torch.randn(100, 3)
-angle, move = net(x_in)
-
-print(angle.shape, move.shape)

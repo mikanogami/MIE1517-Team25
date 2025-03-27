@@ -7,16 +7,18 @@ from torch.utils.data import Dataset, DataLoader
 import argparse
 import time
 import os
+from net import RobotControlNet
+from data_loader import SensorDataset, UniformBatchSampler, collate_fn
 
-from data_loader import SensorDataset, UniformBatchSampler
+#def accuracy():
 
-def train_model(model, train_loader, learning_rate=0.001, num_epochs=30):
+
+def train_model(model, train_loader, learning_rate=1e-3, num_epochs=100):
     print("Start training model")
     # Fixed PyTorch random seed for reproducible results
     torch.manual_seed(25)
     
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr = learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
 
     train_err = np.zeros(num_epochs)
     train_loss = np.zeros(num_epochs)
@@ -29,7 +31,21 @@ def train_model(model, train_loader, learning_rate=0.001, num_epochs=30):
             inputs, labels = data
             optimizer.zero_grad()
             outputs = model(inputs)
-            loss = criterion(outputs, labels)
+
+            #y_pred = F.softmax(outputs, 1)
+
+            # weight errors according to inverse frequency of occurance (prevent overfitting from data that is unequally distributed across classes)
+            num_bins = model.n_classes
+            cmd_counts = torch.bincount(labels.flatten(), minlength=num_bins)
+            inv_weights = torch.empty(num_bins)
+            for cmd_idx, count in enumerate(cmd_counts):
+                if count == 0:
+                    inv_weights[cmd_idx] = 1
+                else:
+                    inv_weights[cmd_idx] = 1/count
+
+            loss_fn = nn.CrossEntropyLoss(weight=inv_weights)
+            loss = loss_fn(outputs, labels)
             loss.backward()
             optimizer.step()
             _, predicted = torch.max(outputs, 1)  # Get the class with the highest probability
@@ -41,25 +57,28 @@ def train_model(model, train_loader, learning_rate=0.001, num_epochs=30):
         train_loss[epoch] = float(total_train_loss) / (i + 1)
 
         print(f"Epoch {epoch + 1}: Train err: {train_err[epoch]:.4f}, Train loss: {train_loss[epoch]:.4f}")    
-        model_path = (f"Model_lr{learning_rate}_ep{epoch}")
-        torch.save(net.state_dict(), model_path)
 
+    model_path = (f"Model_lr{learning_rate}_ep{epoch}")
+    torch.save(model.state_dict(), model_path)
     print("Finished training")
 
 
 def main():
-    n_classes = 15
+    n_classes = 20
     batch_size = 256
     train_dataset = SensorDataset(root_dir="data", num_classes=n_classes)
-    train_sampler = UniformBatchSampler(train_dataset, batch_size=batch_size)
-    train_loader = DataLoader(train_dataset, sampler=train_sampler)
+    train_sampler = UniformBatchSampler(train_dataset.data, batch_size=batch_size)
+    train_loader = DataLoader(train_dataset, sampler=train_sampler, batch_size=None, collate_fn=collate_fn)
 
-    # test UniformBatchSampler
-    
+    # test that UniformBatchSampler samples batches with approximately the same distribution of classes across batches
     for i_batch, batch in enumerate(train_loader):
         data, steering_angles = batch
-        cmd_counts = torch.bincount(steering_angles.flatten(), minlength=n_classes)
+        cmd_counts = torch.bincount(steering_angles, minlength=n_classes)
         print('Batch {} has distribution: {}'.format(i_batch, cmd_counts))
+    
+    model = RobotControlNet(n_classes=n_classes)
+    train_model(model, train_loader, num_epochs=300)
+
     
 
 if __name__ == "__main__":
