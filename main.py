@@ -76,6 +76,9 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
     TRACK_PID = EXPERT.PID(Kp=2, Ki=0, Kd=0.2, dt=0.5)
     TRAJECTORY_PID = EXPERT.PID(Kp=0.01, Ki=0.0, Kd=1, dt=0.6)
 
+    #TRACK_PID = EXPERT.PID(Kp=2, Ki=3, Kd=7.5, dt=0.5)
+    #TRAJECTORY_PID = EXPERT.PID(Kp=0.0001, Ki=0.5, Kd=1, dt=0.5)
+
     # Initialize CSV training data list
     training_data = []
 
@@ -103,10 +106,11 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
 
             # Manually simulate a specific sensor or sensors
             #utilities.simulate_sensors(environment, SIMULATE_LIST)
-
+            u3 = ROBOT.sensors.get('u3').simulate(0, environment)   
             u0 = ROBOT.sensors.get('u0').simulate(0, environment)   # left sensor reading
             u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # middle sensor reading
             u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # right sensor reading
+            u4 = ROBOT.sensors.get('u4').simulate(0, environment)  
 
             if expert_bool:
                 # Use both track and trajectory error to adjust steering angle
@@ -126,10 +130,10 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
                     smoothed_adjustment = -1.5
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=smoothed_adjustment)
                 if save_expert_data:
-                    training_data.append((u0, u1, u2, smoothed_adjustment))
+                    training_data.append((u3, u0, u1, u2, u4, smoothed_adjustment))
 
             else:
-                sensor_vals = np.array([u0, u1, u2])
+                sensor_vals = np.array([u3, u0, u1, u2, u4])
                 steering_adjustment = model.get_steering_cmd(sensor_vals)
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
 
@@ -139,10 +143,14 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
 
             cte, heading_error = EXPERT.get_cte(ROBOT.position, ROBOT.rotation, CW=CONFIG.clockwise)
             # if cte or heading_error are too high, expert takes over
-            if not expert_bool and (abs(cte) > 1.5 or abs(heading_error) > 15):
+            if not expert_bool and (abs(cte) > 1.0 or abs(heading_error) > 15):
+                print(f"{'CW' if CONFIG.clockwise else 'CCW'} - cte: {cte}, rot_error: {heading_error}")
                 expert_bool = True
-            elif expert_bool and (abs(cte) < 0.5 and abs(heading_error) < 5):
-                expert_bool = False
+            elif model is not None and expert_bool:
+                if EXPERT.is_straight_section(ROBOT.position) and (abs(cte) < 0.5 or abs(heading_error) < 5):
+                    expert_bool = False
+                elif not EXPERT.is_straight_section(ROBOT.position) and (abs(cte) < 0.5 and abs(heading_error) < 5):
+                    expert_bool = False
             
             ###########################################
             ##### DRAW RELEVANT OBJECTS ON CANVAS #####
@@ -175,7 +183,10 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
 
             # check that we have not surpassed runtime
             if time.time() - start_time > runtime:
-                RUNNING = False
+                if model is None:
+                    RUNNING = False
+                elif not expert_bool:
+                    RUNNING = False
 
     except KeyboardInterrupt:
         pass
@@ -189,10 +200,12 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
             print('Saved CSV!')
 
 if __name__ == "__main__":
-    n_classes = 20
-
-    agent = RobotControlNet(n_classes=n_classes)
-    agent.load_state_dict(torch.load("Model_lr0.001_ep299"))
+    n_classes = 16
+    n_sensors = 5
+    batch_size = 256
+    
+    agent = RobotControlNet(ultrasonic_dim=n_sensors, n_classes=n_classes)
+    agent.load_state_dict(torch.load("Model_dagger2_sensors5_lr0.001_ep499"))
     
     # run simulation with robot moving clockwise
     start_pos_CW = [6, 36]
@@ -200,7 +213,7 @@ if __name__ == "__main__":
     CONFIG.robot_start_position = start_pos_CW
     CONFIG.robot_start_rotation = start_rot_CW
     CONFIG.clockwise = True
-    run_sim(model=agent, save_expert_data=False, dagger_itr=1, runtime=120)
+    run_sim(model=agent, save_expert_data=True, dagger_itr=3, runtime=120)
 
     # run simulation with robot moving counter clockwise
     start_pos_CCW = [6, 12]
@@ -208,7 +221,7 @@ if __name__ == "__main__":
     CONFIG.robot_start_position = start_pos_CCW
     CONFIG.robot_start_rotation = start_rot_CCW
     CONFIG.clockwise = False
-    run_sim(model=agent, save_expert_data=False, dagger_itr=1, runtime=120)
+    run_sim(model=agent, save_expert_data=True, dagger_itr=3, runtime=120)
 
     print('Execution finished. Closing SimMeR.')
     pygame.quit()

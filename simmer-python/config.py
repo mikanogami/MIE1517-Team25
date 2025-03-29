@@ -187,6 +187,22 @@ drives = {
 }
 
 # Sensors
+u3_info = {
+    'id': 'u3',
+    'position': [3, 3],
+    'height': 2,
+    'rotation': -90,
+    'error': 0.02,
+    'outline': [
+        pm.Vector2(-1, -0.5),
+        pm.Vector2(-1, 0.5),
+        pm.Vector2(1, 0.5),
+        pm.Vector2(1, -0.5)
+    ],
+    'visible': True,
+    'visible_measurement': True
+}
+
 u0_info = {
     'id': 'u0',
     'position': [3, 3],
@@ -235,6 +251,22 @@ u2_info = {
     'visible_measurement': True
 }
 
+u4_info = {
+    'id': 'u4',
+    'position': [-3, 3],
+    'height': 2,
+    'rotation': 90,
+    'error': 0.02,
+    'outline': [
+        pm.Vector2(-1, -0.5),
+        pm.Vector2(-1, 0.5),
+        pm.Vector2(1, 0.5),
+        pm.Vector2(1, -0.5)
+    ],
+    'visible': True,
+    'visible_measurement': True
+}
+
 g0_info = {
     'id': 'g0',
     'position': [0, 0],
@@ -268,9 +300,11 @@ i0_info = {
 }
 
 sensors = {
+    'u3': Ultrasonic(u3_info),
     'u0': Ultrasonic(u0_info),
     'u1': Ultrasonic(u1_info),
     'u2': Ultrasonic(u2_info),
+    'u4': Ultrasonic(u4_info),
     'g0': Gyroscope(g0_info),
     'c0': Compass(c0_info),
     'i0': Infrared(i0_info)
@@ -279,4 +313,4 @@ sensors = {
 
 
 ### TESTING AND DEBUG SETTINGS ###
-simulate_list = ['u0', 'u1', 'u2', 'i0','g0']
+simulate_list = ['u3', 'u0', 'u1', 'u2', 'u4', 'i0','g0']

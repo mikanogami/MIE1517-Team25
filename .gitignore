@@ -91,7 +91,7 @@ celerybeat.pid
 .myenv
 .venv
 myenv/
-data/
+data_tmp/
 models/
 
 # mkdocs documentation

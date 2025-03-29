@@ -25,7 +25,7 @@ class SensorDataset(Dataset):
         self.filepaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if f.endswith(".csv")]
 
         # Load and concatenate all CSV files
-        data_from_file = [np.loadtxt(f, delimiter=",") for f in self.filepaths]
+        data_from_file = [np.loadtxt(f, delimiter=",") for f in self.filepaths if os.path.getsize(f) > 0]
         self.data = np.vstack(data_from_file)
 
         # Extract features (sensor values) and labels

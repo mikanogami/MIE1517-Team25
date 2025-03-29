@@ -128,6 +128,47 @@ class Expert:
         heading_error = (heading - rot + 180) % 360 - 180
         if not CW:
             cte = -cte
+        #print(f"get_cte: {type(cte)}, {type(heading_error)}")
+        return float(cte), float(heading_error)
+    
 
-        return cte, heading_error
+    def is_straight_section(self, position, CW=True):
+        '''
+        True: if robot is in the straight section of the maze
+        False: if robot is in the turning sections of the maze
+        '''
+        x, y = position
+
+        track_width = 12
+        maze_dim_x = 96
+        maze_dim_y = 48
+ 
+        # straight section: vertical track on the left
+        if 0 <= x <= track_width and track_width <= y <= maze_dim_y - track_width:
+            return True
+        # turning section: top-left
+        elif 0 <= x < track_width and 0 <= y < track_width:
+            return False
+        # straight section: horizontal track on the top
+        elif track_width <= x <= maze_dim_x - track_width and 0 <= y <= track_width:
+            return True
+        # turning section: top-right
+        elif maze_dim_x - track_width < x <= maze_dim_x and 0 <= y < track_width:
+            return False
+        # straight section: vertical track on the right
+        elif maze_dim_x - track_width <= x <= maze_dim_x and track_width <= y <= maze_dim_y - track_width:
+            return True
+        # turning section: bottom-right
+        elif maze_dim_x - track_width < x <= maze_dim_x and maze_dim_y - track_width < y <= maze_dim_y:
+            return False
+        # straight section: horizontal track on the bottom
+        elif track_width <= x <= maze_dim_x - track_width and maze_dim_y - track_width <= y <= maze_dim_y:
+            return True
+        # turning section: bottom-left
+        elif 0 <= x < track_width and maze_dim_y - track_width < y <= maze_dim_y: 
+            return False
+        # ERROR: robot is outside of track
+        else:
+            raise Exception("Robot outside of track")
+    
     
