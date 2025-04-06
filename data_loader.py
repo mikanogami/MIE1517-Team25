@@ -14,15 +14,22 @@ def collate_fn(batch):
     return inputs, labels
 
 class SensorDataset(Dataset):
-    def __init__(self, root_dir, num_classes):
+    def __init__(self, root_dir, num_classes, files=None):
         """
         Args:
             root_dir (str): Directory containing CSV files.
             num_classes (int): Number of categories to discretize the continuous labels.
+            files (int): (optional) if not None, tells us which files to include in dataset
         """
         self.root_dir = root_dir
         self.n_classes = num_classes
-        self.filepaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if f.endswith(".csv")]
+        if files is not None:
+            self.filepaths = [os.path.join(root_dir, f) for f in files if f.endswith(".csv")]
+        else:
+            self.filepaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if f.endswith(".csv")]
+        
+        print(self.filepaths)
+        #self.filepaths = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if f.endswith(".csv")]
 
         # Load and concatenate all CSV files
         data_from_file = [np.loadtxt(f, delimiter=",") for f in self.filepaths if os.path.getsize(f) > 0]
