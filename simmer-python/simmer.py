@@ -30,12 +30,9 @@ import config as CONFIG
 import utilities
 import argparse
 
-def main(config=None):
+def main():
     ### Initialization
     print('SimMeR Loading...')
-
-    if config is not None:
-        CONFIG=config
 
     # Set random error seed
     if not CONFIG.rand_error:
