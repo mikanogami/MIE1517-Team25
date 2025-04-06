@@ -313,12 +313,9 @@ sensors = {
     'u1': Ultrasonic(u1_info),
     'u2': Ultrasonic(u2_info),
     'u4': Ultrasonic(u4_info),
-    'g0': Gyroscope(g0_info),
-    'c0': Compass(c0_info),
-    'i0': Infrared(i0_info)
 }
 
 
 
 ### TESTING AND DEBUG SETTINGS ###
-simulate_list = ['u3', 'u0', 'u1', 'u2', 'u4', 'i0','g0']
+simulate_list = ['u3', 'u0', 'u1', 'u2', 'u4']

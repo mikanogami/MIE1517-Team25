@@ -38,7 +38,7 @@ import utilities
 from expert import Expert
 from net import RobotControlNet
 
-def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
+def run_sim(model=None, dagger_itr=None, runtime=None, save_data_dir=None):
     ### Initialization
     print('SimMeR Loading...')
 
@@ -73,11 +73,14 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
 
     # Create expert that controls robot
     EXPERT = Expert()
-    TRACK_PID = EXPERT.PID(Kp=2, Ki=0, Kd=0.2, dt=0.5)
-    TRAJECTORY_PID = EXPERT.PID(Kp=0.01, Ki=0.0, Kd=1, dt=0.6)
 
-    #TRACK_PID = EXPERT.PID(Kp=2, Ki=3, Kd=7.5, dt=0.5)
-    #TRAJECTORY_PID = EXPERT.PID(Kp=0.0001, Ki=0.5, Kd=1, dt=0.5)
+    # We chose different PID control gains for expert driving robot (no agent) and expert correcting agent
+    if model is None:
+        TRACK_PID = EXPERT.PID(Kp=2, Ki=3, Kd=7.5, dt=0.5)
+        TRAJECTORY_PID = EXPERT.PID(Kp=0.0001, Ki=0.5, Kd=1, dt=0.5)
+    else:
+        TRACK_PID = EXPERT.PID(Kp=2, Ki=0, Kd=0.2, dt=0.5)
+        TRAJECTORY_PID = EXPERT.PID(Kp=0.01, Ki=0.0, Kd=1, dt=0.6)
 
     # Initialize CSV training data list
     training_data = []
@@ -129,8 +132,7 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
                 elif smoothed_adjustment < -1.5:
                     smoothed_adjustment = -1.5
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=smoothed_adjustment)
-                if save_expert_data:
-                    training_data.append((u3, u0, u1, u2, u4, smoothed_adjustment))
+                training_data.append((u3, u0, u1, u2, u4, smoothed_adjustment))
 
             else:
                 sensor_vals = np.array([u3, u0, u1, u2, u4])
@@ -189,12 +191,12 @@ def run_sim(model=None, save_expert_data=False, dagger_itr=None, runtime=None):
                     RUNNING = False
 
     except KeyboardInterrupt:
-        pass
+        return
     
     print(time.time() - start_time)
     # Save training data on exit
-    if save_expert_data:
-        with open(f"data_tmp/training_data_{dagger_itr}_{'CW' if CONFIG.clockwise else 'CCW'}.csv", "w", newline="") as csvfile:
+    if save_data_dir is not None:
+        with open(f"{save_data_dir}/training_data_{dagger_itr}_{'CW' if CONFIG.clockwise else 'CCW'}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(training_data)
             print('Saved CSV!')
