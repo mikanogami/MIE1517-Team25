@@ -109,11 +109,12 @@ def run_sim(model=None, dagger_itr=None, runtime=None, save_data_dir=None):
 
             # Manually simulate a specific sensor or sensors
             #utilities.simulate_sensors(environment, SIMULATE_LIST)
-            u3 = ROBOT.sensors.get('u3').simulate(0, environment)   
-            u0 = ROBOT.sensors.get('u0').simulate(0, environment)   # left sensor reading
-            u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # middle sensor reading
-            u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # right sensor reading
-            u4 = ROBOT.sensors.get('u4').simulate(0, environment)  
+             
+            u0 = ROBOT.sensors.get('u0').simulate(0, environment)   # left-facing, left sensor reading
+            u1 = ROBOT.sensors.get('u1').simulate(0, environment)   # forward-facing, left sensor reading 
+            u2 = ROBOT.sensors.get('u2').simulate(0, environment)   # forward-facing, middle sensor reading
+            u3 = ROBOT.sensors.get('u3').simulate(0, environment)   # forward-facing, right sensor reading
+            u4 = ROBOT.sensors.get('u4').simulate(0, environment)   # right-facing, right sensor reading
 
             if expert_bool:
                 # Use both track and trajectory error to adjust steering angle
@@ -135,7 +136,7 @@ def run_sim(model=None, dagger_itr=None, runtime=None, save_data_dir=None):
                 training_data.append((u3, u0, u1, u2, u4, smoothed_adjustment))
 
             else:
-                sensor_vals = np.array([u3, u0, u1, u2, u4])
+                sensor_vals = np.array([u0, u1, u2, u3, u4])
                 steering_adjustment = model.get_steering_cmd(sensor_vals)
                 ROBOT.move_constant_speed(walls=[*BLOCK.block_square, *MAZE.reduced_walls], steering_angle=steering_adjustment)
 
@@ -207,7 +208,7 @@ if __name__ == "__main__":
     batch_size = 256
     
     agent = RobotControlNet(ultrasonic_dim=n_sensors, n_classes=n_classes)
-    agent.load_state_dict(torch.load("Model_dagger2_sensors5_lr0.001_ep499"))
+    agent.load_state_dict(torch.load("models/default_5sensors_16classes_120runtime_6dagger/model_dagger4_lr0.001_ep299"))
     
     # run simulation with robot moving clockwise
     start_pos_CW = [6, 36]
@@ -215,7 +216,7 @@ if __name__ == "__main__":
     CONFIG.robot_start_position = start_pos_CW
     CONFIG.robot_start_rotation = start_rot_CW
     CONFIG.clockwise = True
-    run_sim(model=agent, save_expert_data=True, dagger_itr=3, runtime=120)
+    run_sim(model=agent, save_data_dir=None, dagger_itr=3, runtime=120)
 
     # run simulation with robot moving counter clockwise
     start_pos_CCW = [6, 12]
@@ -223,7 +224,7 @@ if __name__ == "__main__":
     CONFIG.robot_start_position = start_pos_CCW
     CONFIG.robot_start_rotation = start_rot_CCW
     CONFIG.clockwise = False
-    run_sim(model=agent, save_expert_data=True, dagger_itr=3, runtime=120)
+    run_sim(model=agent, save_data_dir=None, dagger_itr=3, runtime=120)
 
     print('Execution finished. Closing SimMeR.')
     pygame.quit()

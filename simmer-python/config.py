@@ -195,8 +195,8 @@ drives = {
 }
 
 # Sensors
-u3_info = {
-    'id': 'u3',
+u0_info = {
+    'id': 'u0',
     'position': [3, 3],
     'height': 2,
     'rotation': -90,
@@ -211,8 +211,8 @@ u3_info = {
     'visible_measurement': True
 }
 
-u0_info = {
-    'id': 'u0',
+u1_info = {
+    'id': 'u1',
     'position': [3, 3],
     'height': 2,
     'rotation': 0,
@@ -227,8 +227,8 @@ u0_info = {
     'visible_measurement': True
 }
 
-u1_info = {
-    'id': 'u1',
+u2_info = {
+    'id': 'u2',
     'position': [0, 3],
     'height': 4,
     'rotation': 0,
@@ -243,8 +243,8 @@ u1_info = {
     'visible_measurement': True
 }
 
-u2_info = {
-    'id': 'u2',
+u3_info = {
+    'id': 'u3',
     'position': [-3, 3],
     'height': 4,
     'rotation': 0,
@@ -308,14 +308,14 @@ i0_info = {
 }
 
 sensors = {
-    'u3': Ultrasonic(u3_info),
     'u0': Ultrasonic(u0_info),
     'u1': Ultrasonic(u1_info),
     'u2': Ultrasonic(u2_info),
+    'u3': Ultrasonic(u3_info),
     'u4': Ultrasonic(u4_info),
 }
 
 
 
 ### TESTING AND DEBUG SETTINGS ###
-simulate_list = ['u3', 'u0', 'u1', 'u2', 'u4']
+simulate_list = ['u0', 'u1', 'u2', 'u3', 'u4']
