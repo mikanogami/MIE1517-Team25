@@ -51,7 +51,7 @@ block_size = 0                  # Block side length in inches
 
 # Robot information
 robot_start_position = [6, 36]  # Robot starting location (in)
-robot_start_rotation = 0      # Robot starting rotation (deg)
+robot_start_rotation = 180      # Robot starting rotation (deg)
 robot_width = 6                 # Robot width in inches
 robot_height = 6                # Robot height in inches
 robot_outline = [               # Robot outline, relative to center position

@@ -28,129 +28,137 @@ from interface.hud import Hud
 from interface.communication import TCPServer
 import config as CONFIG
 import utilities
+import argparse
 
-### Initialization
-print('SimMeR Loading...')
+def main(config=None):
+    ### Initialization
+    print('SimMeR Loading...')
 
-# Set random error seed
-if not CONFIG.rand_error:
-    np.random.seed(CONFIG.floor_seed)
+    if config is not None:
+        CONFIG=config
 
-# Load maze walls and floor pattern
-MAZE = Maze()
-MAZE.import_walls()
-MAZE.generate_floor()
-CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
-CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
+    # Set random error seed
+    if not CONFIG.rand_error:
+        np.random.seed(CONFIG.floor_seed)
 
-# Load robot
-ROBOT = Robot()
+    # Load maze walls and floor pattern
+    MAZE = Maze()
+    MAZE.import_walls()
+    MAZE.generate_floor()
+    CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
+    CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 
-# List of sensors to simulate every frame (for testing only)
-if hasattr(CONFIG, 'simulate_list'):
-    SIMULATE_LIST = CONFIG.simulate_list
-else:
-    SIMULATE_LIST = []
+    # Load robot
+    ROBOT = Robot()
 
-# Create the block
-BLOCK = Block()
+    # List of sensors to simulate every frame (for testing only)
+    if hasattr(CONFIG, 'simulate_list'):
+        SIMULATE_LIST = CONFIG.simulate_list
+    else:
+        SIMULATE_LIST = []
 
-# Create a copy of the environment objects to pass to simulation functions
-environment = {'BLOCK': BLOCK, 'MAZE': MAZE, 'ROBOT': ROBOT}
+    # Create the block
+    BLOCK = Block()
 
-# Load the Heads Up Display
-HUD = Hud()
+    # Create a copy of the environment objects to pass to simulation functions
+    environment = {'BLOCK': BLOCK, 'MAZE': MAZE, 'ROBOT': ROBOT}
 
-# Load TCP Communication
-COMM = TCPServer()
-COMM.start()
+    # Load the Heads Up Display
+    HUD = Hud()
 
-# Initialize graphics
-pygame.init()
-canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
+    # Load TCP Communication
+    COMM = TCPServer()
+    COMM.start()
 
-### Main Loop ###
-RUNNING = True
-try:
-    while RUNNING:
+    # Initialize graphics
+    pygame.init()
+    canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
 
-        ##########################
-        ##### USER INTERFACE #####
-        ##########################
-        # Check for keyboard input
-        game_events = pygame.event.get()
-        RUNNING = HUD.check_input(game_events)
-        keypress = pygame.key.get_pressed()
+    ### Main Loop ###
+    RUNNING = True
+    try:
+        while RUNNING:
 
-        # Get the command information from the tcp buffer
-        cmds = COMM.get_buffer_rx()
+            ##########################
+            ##### USER INTERFACE #####
+            ##########################
+            # Check for keyboard input
+            game_events = pygame.event.get()
+            RUNNING = HUD.check_input(game_events)
+            keypress = pygame.key.get_pressed()
 
-        ################################################
-        ##### ROBOT AND DEVICE UPDATES AND ACTIONS #####
-        ################################################
-        # Act on commands and respond
-        if cmds:
-            responses = ROBOT.command(cmds, environment)
-            COMM.set_buffer_tx(responses)
+            # Get the command information from the tcp buffer
+            cmds = COMM.get_buffer_rx()
 
-        # Move the robot, either from keypress commands or from the movement buffers
-        if True in keypress:
-            ROBOT.move_manual(keypress, [*BLOCK.block_square, *MAZE.reduced_walls])
-        else:
-            ROBOT.move_from_command([*BLOCK.block_square, *MAZE.reduced_walls])
+            ################################################
+            ##### ROBOT AND DEVICE UPDATES AND ACTIONS #####
+            ################################################
+            # Act on commands and respond
+            if cmds:
+                responses = ROBOT.command(cmds, environment)
+                COMM.set_buffer_tx(responses)
 
-        # Recalculate global positions of the robot and its devices
-        ROBOT.update_outline()
-        ROBOT.update_device_positions() 
-        robot_angle = (ROBOT.rotation % 360 + 360) % 360
-        #print(robot_angle)
-        # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(environment, SIMULATE_LIST)
+            # Move the robot, either from keypress commands or from the movement buffers
+            if True in keypress:
+                ROBOT.move_manual(keypress, [*BLOCK.block_square, *MAZE.reduced_walls])
+            else:
+                ROBOT.move_from_command([*BLOCK.block_square, *MAZE.reduced_walls])
 
-        # Update the sensors that need to be updated every frame
-        """
-        for sensor in ROBOT.sensors.values():
-            if callable(getattr(sensor, "update", None)):
-                sensor.update(environment)
-                ultrasonic_sensor_reading = ROBOT.sensors['u0']
-                infrared_sensor_reading = ROBOT.sensors['i0']
-                gyro_sensor_reading = ROBOT.sensors['g0']
-                print(f"infrared sensor reading: : {ultrasonic_sensor_reading.last_reading}")
-                print(f"infrared sensor reading: {infrared_sensor_reading.last_reading}")
-                print(f"gyro sensor reading: {gyro_sensor_reading.gyro}")
-        """
-        ###########################################
-        ##### DRAW RELEVANT OBJECTS ON CANVAS #####
-        ###########################################
-        # Fill the background with the background color
-        canvas.fill(CONFIG.background_color)
+            # Recalculate global positions of the robot and its devices
+            ROBOT.update_outline()
+            ROBOT.update_device_positions() 
+            robot_angle = (ROBOT.rotation % 360 + 360) % 360
+            #print(robot_angle)
+            # Manually simulate a specific sensor or sensors
+            utilities.simulate_sensors(environment, SIMULATE_LIST)
 
-        # Draw the maze checkerboard pattern
-        MAZE.draw_floor(canvas)
+            # Update the sensors that need to be updated every frame
+            """
+            for sensor in ROBOT.sensors.values():
+                if callable(getattr(sensor, "update", None)):
+                    sensor.update(environment)
+                    ultrasonic_sensor_reading = ROBOT.sensors['u0']
+                    infrared_sensor_reading = ROBOT.sensors['i0']
+                    gyro_sensor_reading = ROBOT.sensors['g0']
+                    print(f"infrared sensor reading: : {ultrasonic_sensor_reading.last_reading}")
+                    print(f"infrared sensor reading: {infrared_sensor_reading.last_reading}")
+                    print(f"gyro sensor reading: {gyro_sensor_reading.gyro}")
+            """
+            ###########################################
+            ##### DRAW RELEVANT OBJECTS ON CANVAS #####
+            ###########################################
+            # Fill the background with the background color
+            canvas.fill(CONFIG.background_color)
 
-        # Draw the maze walls
-        MAZE.draw_walls(canvas)
+            # Draw the maze checkerboard pattern
+            MAZE.draw_floor(canvas)
 
-        # Draw the block
-        BLOCK.draw(canvas)
+            # Draw the maze walls
+            MAZE.draw_walls(canvas)
 
-        # Draw the robot onto the maze
-        ROBOT.draw(canvas)
-        ROBOT.draw_devices(canvas)
+            # Draw the block
+            BLOCK.draw(canvas)
 
-        # Update the various HUD elements
-        HUD.draw_frame_indicator(canvas)
-        HUD.draw_keys(canvas, keypress)
+            # Draw the robot onto the maze
+            ROBOT.draw(canvas)
+            ROBOT.draw_devices(canvas)
 
-        # Limit the framerate
-        HUD.clock.tick(CONFIG.frame_rate)
+            # Update the various HUD elements
+            HUD.draw_frame_indicator(canvas)
+            HUD.draw_keys(canvas, keypress)
 
-        # Flip the display (update the canvas)
-        pygame.display.flip()
+            # Limit the framerate
+            HUD.clock.tick(CONFIG.frame_rate)
 
-except KeyboardInterrupt:
-    pass
+            # Flip the display (update the canvas)
+            pygame.display.flip()
 
-# Done! Time to quit.
-print('Execution finished. Closing SimMeR.')
-pygame.quit()
+    except KeyboardInterrupt:
+        pass
+
+    # Done! Time to quit.
+    print('Execution finished. Closing SimMeR.')
+    pygame.quit()
+
+if __name__ == "__main__":
+        main()
