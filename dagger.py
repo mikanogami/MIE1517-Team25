@@ -48,8 +48,8 @@ def run_CCW_track(model, dagger_itr, save_dir, runtime=120):
     run_sim(model=model, dagger_itr=dagger_itr, runtime=runtime, save_data_dir=save_dir)
 
 def run_dagger(args):
-    data_save_dir = f'data/{get_model_name(args)}'
-    models_save_dir = f'models/{get_model_name(args)}'
+    data_save_dir = f'data/{args['id']}'
+    models_save_dir = f'models/{args['id']}'
 
     agent = None
     for i_dagger in range(args['n_dagger']):
@@ -57,7 +57,7 @@ def run_dagger(args):
         run_CCW_track(model=agent, dagger_itr=i_dagger, save_dir=data_save_dir, runtime=args['deploy_time'])
         pygame.quit()
 
-        train_dataset = SensorDataset(root_dir=f"data/{get_model_name(args)}", num_classes=args['n_classes'])
+        train_dataset = SensorDataset(root_dir=f"data/{args['id']}", num_classes=args['n_classes'])
         train_sampler = UniformBatchSampler(train_dataset.data, batch_size=args['batch_size'])
         train_loader = DataLoader(train_dataset, sampler=train_sampler, batch_size=None, collate_fn=collate_fn)
 
@@ -80,13 +80,13 @@ if __name__ == "__main__":
     }
 
     # create subfolder in data/ directory under unique model name
-    data_path = Path(f'data/{get_model_name(args)}')
+    data_path = Path(f'data/{args['id']}')
     if data_path.exists() and data_path.is_dir() and any(data_path.iterdir()):
         raise RuntimeError(f"Folder {data_path} exists and is not empty!")
     else:
         data_path.mkdir(parents=True, exist_ok=True)
     # create subfolder in models/ directory under unique model name
-    model_path = Path(f'models/{get_model_name(args)}')
+    model_path = Path(f'models/{args['id']}')
     if model_path.exists() and model_path.is_dir() and any(model_path.iterdir()):
         raise RuntimeError(f"Folder {model_path} exists and is not empty!")
     else:

@@ -41,6 +41,10 @@ from net import RobotControlNet
 def run_sim(model=None, dagger_itr=None, runtime=None, save_data_dir=None, start_pos=None, start_rot=None, is_clockwise=True):
     ### Initialization
     print('SimMeR Loading...')
+    
+    # Ensure pygame is initialized in the main process
+    if pygame.get_init() == False:
+        pygame.init()
 
     # Set random error seed
     if not CONFIG.rand_error:
