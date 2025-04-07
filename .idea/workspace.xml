@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ffd804b6-397e-48cf-a7cf-e84220f62ab4" name="Changes" comment="small discussion update">
+    <list default="true" id="ffd804b6-397e-48cf-a7cf-e84220f62ab4" name="Changes" comment="small discussion and limitations update">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Final_Report.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Final_Report.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -165,7 +166,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743992871421</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="small discussion and limitations update">
+      <option name="closed" value="true" />
+      <created>1743993229868</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1743993229868</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -191,7 +200,8 @@
     <MESSAGE value="kd tuning" />
     <MESSAGE value="small results update" />
     <MESSAGE value="small discussion update" />
-    <option name="LAST_COMMIT_MESSAGE" value="small discussion update" />
+    <MESSAGE value="small discussion and limitations update" />
+    <option name="LAST_COMMIT_MESSAGE" value="small discussion and limitations update" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MIE1517_Team25$model.coverage" NAME="model Coverage Results" MODIFIED="1742908975259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simmer-python/devices" />
