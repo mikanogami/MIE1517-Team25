@@ -174,7 +174,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743993229868</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="small discussion and limitations update">
+      <option name="closed" value="true" />
+      <created>1743993966308</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1743993966308</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -202,6 +210,17 @@
     <MESSAGE value="small discussion update" />
     <MESSAGE value="small discussion and limitations update" />
     <option name="LAST_COMMIT_MESSAGE" value="small discussion and limitations update" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
+          <url>file://$PROJECT_DIR$/Final_Report.ipynb</url>
+          <line>493</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MIE1517_Team25$model.coverage" NAME="model Coverage Results" MODIFIED="1742908975259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simmer-python/devices" />
